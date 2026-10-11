@@ -1,0 +1,9 @@
+hub.db
+hub.db-journal
+hub.log
+hub.err
+__pycache__
+*.pyc
+*.bak
+installer
+tools

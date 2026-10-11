@@ -1,0 +1,21 @@
+app = "untilted-devices-app"
+primary_region = "dfw"
+
+[build]
+
+[env]
+  PORT = "8080"
+  DB_PATH = "/data/hub.db"
+  # ALLOW_REGISTER = "0"   # descomenta cuando ya hayas creado tus cuentas
+
+[mounts]
+  source = "hubdata"
+  destination = "/data"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  # el estado de conexiones vive en memoria: no apagar ni escalar
+  auto_stop_machines = "off"
+  auto_start_machines = false
+  min_machines_running = 1

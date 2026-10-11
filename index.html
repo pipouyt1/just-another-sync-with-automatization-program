@@ -1,0 +1,1165 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>hub</title>
+<style>
+:root{--bg:#fef7ff;--surf:#f3edf7;--surf-hi:#ece6f0;--on:#1d1b20;--on-var:#49454f;--outline:#79747e;--outline-var:#cac4d0;
+ --pri:#6750a4;--on-pri:#fff;--pri-c:#eaddff;--on-pri-c:#21005d;--sec-c:#e8def8;--on-sec-c:#1d192b;--ter-c:#ffd8e4;--on-ter-c:#31111d;
+ --err:#b3261e;--err-c:#f9dedc;--on-err-c:#410e0b;--info:#0b57d0;--info-c:#d3e3fd;--on-info-c:#041e49;--warn-c:#ffdea6;--on-warn-c:#2b1800;--warn:#8a5100;--ok-c:#c4eed0;--on-ok-c:#072711;--ok:#1e6b3a;--snack:#322f35;--on-snack:#f5eff7;--scrim:#1d1b2066}
+@media(prefers-color-scheme:dark){:root{--bg:#141218;--surf:#211f26;--surf-hi:#2b2930;--on:#e6e0e9;--on-var:#cac4d0;--outline:#938f99;--outline-var:#49454f;
+ --pri:#d0bcff;--on-pri:#381e72;--pri-c:#4f378b;--on-pri-c:#eaddff;--sec-c:#4a4458;--on-sec-c:#e8def8;--ter-c:#633b48;--on-ter-c:#ffd8e4;
+ --err:#f2b8b5;--err-c:#601410;--on-err-c:#f9dedc;--info:#a8c7fa;--info-c:#0842a0;--on-info-c:#d3e3fd;--warn-c:#5c3b00;--on-warn-c:#ffdea6;--warn:#ffb951;--ok-c:#0d3a1f;--on-ok-c:#c4eed0;--ok:#8fd6a3;--snack:#e6e0e9;--on-snack:#322f35;--scrim:#000a}}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;min-height:100vh;background:var(--bg);color:var(--on);font:16px/1.5 "Roboto Flex",Roboto,"Segoe UI",system-ui,sans-serif}
+body,button{text-transform:lowercase}
+html[data-lang=pi] body,html[data-lang=pi] button,html[data-lang=pi] .tb{text-transform:none}
+input,textarea,select,code,pre,.vname,.vval,.dname{text-transform:none}
+button{font:inherit;color:inherit;cursor:pointer;background:none;border:0;padding:0}
+a{color:inherit}
+svg{fill:currentColor;display:block}
+
+/* ---- botones ---- */
+.btn{font-size:15px;font-weight:500;padding:11px 22px;border-radius:20px;color:var(--pri)}
+.btn:hover{background:color-mix(in srgb,var(--pri) 10%,transparent)}
+.btn.go{background:var(--pri);color:var(--on-pri)}.btn.go:hover{background:var(--pri)}
+.btn.tonal{background:var(--sec-c);color:var(--on-sec-c)}
+.ico{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;flex:none;color:inherit}
+.ico:hover{background:color-mix(in srgb,currentColor 12%,transparent)}
+.ico svg{width:22px;height:22px}.ico.red{color:var(--err)}
+.fab{position:fixed;right:28px;bottom:28px;display:flex;align-items:center;gap:10px;padding:16px 24px;border-radius:20px;background:var(--pri);color:var(--on-pri);font-size:15px;font-weight:500;z-index:5;box-shadow:0 2px 10px #0003}
+.fab:hover{filter:brightness(.97)}.fab svg{width:24px;height:24px}
+
+/* ---- entrada ---- */
+#auth{min-height:100vh;display:grid;place-items:center;padding:16px}
+#auth .card{background:var(--surf);border-radius:32px;padding:30px 28px;width:min(380px,100%)}
+.blob{width:64px;height:64px;border-radius:24px 24px 24px 8px;background:var(--pri-c);color:var(--on-pri-c);display:grid;place-items:center;margin-bottom:16px}
+.blob svg{width:32px;height:32px}
+#auth h2{font-size:34px;font-weight:500;line-height:1.1;margin:2px 0 18px;letter-spacing:-.4px}
+#greet{margin:0;font-size:14px;color:var(--on-var)}
+#err{color:var(--err);min-height:1.3em;margin:8px 0 6px;font-size:14px}
+#auth .btns{display:flex;gap:10px;align-items:center}
+#auth .btns .go{flex:1}
+
+/* ---- campos ---- */
+label{display:block;margin:12px 0 4px;font-size:13px;color:var(--on-var)}
+input,select,textarea{font:inherit;width:100%;padding:13px 16px;border-radius:18px;border:1.5px solid var(--outline);background:transparent;color:var(--on);outline:0}
+input:focus,select:focus,textarea:focus{border:2px solid var(--pri);padding:12.5px 15.5px}
+select option{background:var(--surf-hi);color:var(--on)}
+textarea{resize:vertical}
+
+/* ---- estructura ---- */
+#app{display:grid;grid-template-columns:96px minmax(0,1fr);min-height:100vh}
+#rail{display:flex;flex-direction:column;align-items:center;gap:6px;padding:26px 8px;position:sticky;top:0;height:100vh}
+.nav{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;color:var(--on-var);width:80px;padding:6px 0;text-decoration:none}
+.nav i{width:56px;height:32px;border-radius:16px;display:grid;place-items:center}
+.nav svg{width:24px;height:24px}
+.nav:hover i{background:color-mix(in srgb,var(--on) 8%,transparent)}
+.nav.on{color:var(--on)}.nav.on i{background:var(--sec-c);color:var(--on-sec-c)}
+main{padding:24px 40px 130px;min-width:0;overflow:clip}
+html,body{overflow-x:hidden;max-width:100%}
+.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.top .date{font-size:14px;color:var(--on-var)}
+.top .who{display:flex;align-items:center;gap:6px}
+.avatar{width:44px;height:44px;border-radius:50%;background:var(--ter-c) center/cover;color:var(--on-ter-c);display:grid;place-items:center;font-weight:500;font-size:18px}
+h1{font-size:clamp(34px,6vw,52px);line-height:1.08;font-weight:500;letter-spacing:-.6px;margin:2px 0 20px}
+.seg{display:inline-flex;gap:2px;margin-bottom:18px}
+.seg button{padding:10px 20px;background:var(--sec-c);color:var(--on-sec-c);font-size:14px;border-radius:6px}
+.seg button:first-child{border-radius:20px 6px 6px 20px}.seg button:last-child{border-radius:6px 20px 20px 6px}
+.seg button.on{background:var(--pri);color:var(--on-pri)}
+
+/* ---- variables ---- */
+#vars{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.vcard{padding:18px 20px 12px;display:flex;flex-direction:column;gap:2px;min-height:150px}
+.vcard.c0{background:var(--pri-c);color:var(--on-pri-c)}.vcard.c1{background:var(--ter-c);color:var(--on-ter-c)}.vcard.c2{background:var(--sec-c);color:var(--on-sec-c)}
+.vcard .vname{font-size:14px;opacity:.85}
+.vcard .vval{font-size:28px;font-weight:500;line-height:1.2;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;margin-top:4px}
+.vcard .vby{font-size:12px;opacity:.8;margin-top:2px}
+.vcard .vacts{margin-top:auto;display:flex;justify-content:flex-end;gap:2px;padding-top:8px}
+.empty{padding:32px;border-radius:28px;background:var(--surf);color:var(--on-var);text-align:center}
+
+/* ---- equipos ---- */
+.dlist{background:var(--surf);border-radius:28px;padding:8px}
+.drow{display:flex;align-items:center;gap:14px;padding:10px 12px}
+.drow+.drow{border-top:1px solid var(--outline-var)}
+.dav{width:46px;height:46px;display:grid;place-items:center;flex:none}
+.dav svg{width:24px;height:24px}
+.dav.a0{border-radius:50%;background:var(--pri);color:var(--on-pri)}.dav.a1{border-radius:16px;background:var(--ter-c);color:var(--on-ter-c)}
+.dav.a2{border-radius:14px 14px 14px 4px;background:var(--sec-c);color:var(--on-sec-c)}.dav.a3{border-radius:50%;background:var(--ter-c);color:var(--on-ter-c)}
+.dinfo{flex:1;min-width:0}.dname{font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dsub{font-size:13px;color:var(--on-var)}
+@media(min-width:900px){
+ .dlist{background:none;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+ .drow{background:var(--surf);border-radius:24px;padding:14px 16px}
+ .drow+.drow{border-top:0}
+}
+.chip{font-size:12px;padding:5px 11px;border-radius:10px;background:var(--sec-c);color:var(--on-sec-c)}
+.chip.ok{background:var(--ok-c);color:var(--on-ok-c)}
+
+/* ---- ventanas ---- */
+dialog{background:var(--surf-hi);border:0;color:var(--on);padding:24px;border-radius:28px;width:min(460px,92vw)}
+dialog::backdrop{background:var(--scrim)}
+dialog h3{font-size:24px;font-weight:500;margin:0 0 14px}
+dialog p{margin:8px 0}
+.acts{display:flex;gap:6px;justify-content:flex-end;margin-top:20px;flex-wrap:wrap}
+.hint{font-size:13px;color:var(--on-var)}
+code{display:block;background:var(--on);color:var(--bg);border-radius:14px;padding:10px 14px;margin:6px 0 12px;font:12.5px/1.5 ui-monospace,Consolas,monospace;word-break:break-all}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.chips span{display:inline-flex;align-items:center;gap:2px;padding:4px 4px 4px 12px;border-radius:10px;background:var(--sec-c);color:var(--on-sec-c);font-size:14px}
+.chips span .ico{width:26px;height:26px}.chips span .ico svg{width:16px;height:16px}
+.choices{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
+.tile{padding:16px;display:flex;flex-direction:column;gap:8px;align-items:flex-start;font-size:16px;text-align:left}
+.tile svg{width:30px;height:30px}
+.tile.t0{background:var(--pri-c);color:var(--on-pri-c);border-radius:28px 28px 28px 8px}
+.tile.t1{background:var(--sec-c);color:var(--on-sec-c);border-radius:28px 28px 8px 28px}
+.tile.t2{background:var(--ter-c);color:var(--on-ter-c);border-radius:28px 8px 28px 28px}
+.tile.t3{background:var(--ok-c);color:var(--on-ok-c);border-radius:8px 28px 28px 28px}
+#toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:var(--snack);color:var(--on-snack);padding:14px 20px;border-radius:14px;
+ display:none;max-width:90vw;z-index:20;font-size:14px}
+
+/* ---- movimiento (material 3 expressive: resortes, formas que cambian, entradas escalonadas) ---- */
+:root{--spring:cubic-bezier(.34,1.56,.64,1);--emph:cubic-bezier(.2,0,0,1)}
+*{-webkit-tap-highlight-color:transparent}
+html{overscroll-behavior:none}
+body{-webkit-user-select:none;user-select:none}
+input,textarea,code,select{-webkit-user-select:text;user-select:text}
+button{position:relative;overflow:hidden;transition:transform .4s var(--spring),border-radius .4s var(--spring),background-color .2s,filter .2s}
+button:active{transform:scale(.93)}
+.btn:active{border-radius:12px}
+.fab{overflow:visible;transition:transform .4s var(--spring),border-radius .4s var(--spring),box-shadow .3s}
+.fab:active{border-radius:30px;transform:scale(.92)}
+.vcard{transition:transform .4s var(--spring),border-radius .45s var(--spring)}
+.vcard:active{transform:scale(.97);border-radius:40px!important}
+.drow{transition:transform .35s var(--spring)}
+.drow:active{transform:scale(.985)}
+.nav i{transition:background-color .25s,width .4s var(--spring)}
+.nav.on i{width:64px}
+.seg button{transition:background-color .25s,color .25s,border-radius .4s var(--spring),transform .4s var(--spring)}
+.rip{position:absolute;border-radius:50%;background:currentColor;opacity:.2;transform:scale(0);animation:rip .65s var(--emph) forwards;pointer-events:none}
+@keyframes rip{to{transform:scale(1);opacity:0}}
+@keyframes pop{from{opacity:0;transform:translateY(28px) scale(.9)}to{opacity:1;transform:none}}
+@keyframes slide{from{opacity:0;transform:translateX(28px)}to{opacity:1;transform:none}}
+@keyframes dlg{from{opacity:0;transform:translateY(60px) scale(.88)}to{opacity:1;transform:none}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@keyframes up{from{opacity:0;transform:translate(-50%,40px) scale(.9)}to{opacity:1;transform:translate(-50%,0)}}
+.anim>.vcard,.anim>.drow,.anim>.empty{animation:pop .6s var(--spring) both;animation-delay:calc(var(--i,0)*50ms)}
+#v-vars:not([hidden]),#v-devs:not([hidden]){animation:slide .45s var(--emph)}
+.fab{animation:pop .6s var(--spring) .15s both}
+dialog[open]{animation:dlg .5s var(--spring)}
+dialog[open]::backdrop{animation:fade .3s}
+#toast{animation:up .45s var(--spring)}
+#auth .card{animation:pop .7s var(--spring)}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;animation-delay:0s!important}}
+
+.alert{display:flex;align-items:center;gap:10px;background:var(--info-c);color:var(--on-info-c);padding:12px 18px;border-radius:20px 20px 20px 6px;margin:0 0 14px;font-weight:500;font-size:14px;animation:pop .6s var(--spring) both}
+.alert svg{width:22px;height:22px;flex:none}.alert .grow{flex:1}.alert .tb{padding:6px 12px;border-radius:999px;font-size:13px;font-weight:500}.alert .tb:hover{background:color-mix(in srgb,currentColor 12%,transparent)}.alert .ico{width:32px;height:32px}.u{text-transform:none}
+/* ---- aviso grande y ajustes ---- */
+dialog.warn{background:var(--err-c);color:var(--on-err-c);overflow-x:hidden}
+dialog.warn h3{display:flex;align-items:center;gap:12px;color:var(--err)}
+dialog.warn h3 svg{width:34px;height:34px;flex:none}
+dialog.warn p{font-size:15px;line-height:1.55}
+dialog.warn a{color:var(--err);font-weight:600}
+dialog.warn .btn{color:var(--on-err-c)}
+dialog.warn .btn.danger{background:var(--err);color:var(--bg)}
+.setcard{background:var(--surf);border-radius:28px 28px 12px 28px;padding:20px 22px;max-width:640px}
+.setcard h3{margin:0 0 6px;font-size:20px;font-weight:500;display:flex;align-items:center;gap:10px}
+.setcard h3 svg{width:24px;height:24px;color:var(--err)}
+.setrow{display:flex;align-items:center;gap:14px;margin:14px 0 4px}
+.setrow .grow{flex:1}
+.sw{position:relative;width:52px;height:32px;flex:none}
+.sw input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:pointer;z-index:1}
+.sw i{position:absolute;inset:0;border-radius:16px;border:2px solid var(--outline);background:var(--surf-hi);transition:background .25s,border-color .25s}
+.sw i::after{content:"";position:absolute;left:6px;top:6px;width:16px;height:16px;border-radius:50%;background:var(--outline);transition:transform .4s var(--spring),width .3s,height .3s,background .25s,left .3s,top .3s}
+.sw input:checked+i{background:var(--pri);border-color:var(--pri)}
+.sw input:checked+i::after{background:var(--on-pri);width:24px;height:24px;left:2px;top:2px;transform:translateX(20px)}
+#v-settings:not([hidden]){animation:slide .45s var(--emph)}
+/* ---- ajustes: tarjetas, bloqueo, difuminado ---- */
+.setcard+.setcard{margin-top:14px}
+@media(min-width:1000px){#v-settings:not([hidden]){display:block;columns:2;column-gap:14px}#v-settings .setcard{max-width:none;margin:0 0 14px!important;break-inside:avoid}#v-settings .setcard.danger{column-span:all}}
+.setcard h3+h4{border-top:0;padding-top:0;margin-top:10px}
+.setcard:nth-of-type(even){border-radius:12px 28px 28px 28px}
+.setcard.danger{background:var(--err-c);color:var(--on-err-c)}
+.setcard.danger h3,.setcard.danger h3 svg{color:var(--err)}
+.setcard.danger .btn{background:var(--err);color:var(--bg)}.setcard.danger .hint{color:var(--on-err-c);opacity:.8}
+.setcard.danger .sw i{border-color:var(--err);background:transparent}.setcard.danger .sw i::after{background:var(--err)}
+.setcard.danger .sw input:checked+i{background:var(--err);border-color:var(--err)}.setcard.danger .sw input:checked+i::after{background:var(--err-c)}
+.setcard h4{margin:20px 0 6px;padding-top:14px;border-top:1px solid var(--outline-var);font-size:15px;font-weight:500;color:var(--on-var)}
+.setcard h3+h4,.setcard p+h4{}
+.setcard .av{width:56px;height:56px;flex:none;border-radius:58% 42% 55% 45%/50% 58% 42% 50%;background:var(--ter-c);color:var(--on-ter-c);display:grid;place-items:center;font-size:24px;font-weight:500;overflow:hidden;background-size:cover;background-position:center;text-transform:uppercase}
+.pkrow{display:flex;align-items:center;gap:10px;padding:8px 8px 8px 16px;margin:6px 0;background:var(--sec-c);color:var(--on-sec-c);border-radius:999px}
+.pkrow span{flex:1;text-transform:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pkrow .ico{width:32px;height:32px}
+.chip.bad{background:var(--err-c);color:var(--err)}
+.alert.lockbar{background:var(--err-c);color:var(--on-err-c)}
+.alert.upd{background:var(--warn-c);color:var(--on-warn-c);align-items:flex-start}
+.updrow{display:flex;align-items:center;gap:8px;margin-top:8px;font-weight:400;font-size:13px}.updrow span{flex:1;text-transform:none}
+.alert.upd .btn{padding:7px 16px;font-size:13px;background:var(--warn);color:var(--bg);text-decoration:none;display:inline-block}.alert.upd .btn[disabled]{opacity:.45;cursor:default}
+.alert.upd b{display:block;font-size:16px;margin-bottom:2px}.alert.upd small{display:block;opacity:.85;margin-top:4px;font-weight:400;font-size:13px}.alert.upd svg{margin-top:2px}
+.alert.lockbar.open{background:var(--ok-c);color:var(--on-ok-c)}
+.alert .tb.go{background:currentColor;color:var(--bg)}
+body.ha .acard .aurl:not(.rev),body.hk .krow .dinfo:not(.rev),body.hw .wcard .wprev:not(.rev),body.hw .wcard .wt:not(.rev),body.hw .wcard .wsub:not(.rev),
+body.hw .wcard .chips:not(.rev),body.hd #devices .dname:not(.rev),body.hd #devices .dsub:not(.rev),body.hd .wcard .chips:not(.rev){filter:blur(8px)}
+.acard .aurl,.krow .dinfo,.wcard .wprev,.wcard .wt,.wcard .wsub,.wcard .chips,#devices .dname,#devices .dsub{transition:filter .3s}
+.langrow{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 2px}
+.langrow .btn.go{background:var(--pri);color:var(--on-pri)}
+#auth .langrow{justify-content:center;margin:14px 0 0}
+/* ---- novedades (changelog) ---- */
+dialog.wide{width:min(700px,94vw);border-radius:44px 16px 44px 44px}
+.csplit{display:grid;grid-template-columns:150px minmax(0,1fr);gap:14px}
+.clist{display:flex;flex-direction:column;gap:8px;max-height:340px;overflow:auto;padding:2px}
+.cvb{display:flex;align-items:center;gap:8px;text-align:left;padding:0 16px;height:52px;background:var(--surf);color:var(--on);font-size:16px;font-weight:500;border-radius:26px;flex:none}
+.cvb:hover{border-radius:18px;transform:translateX(2px)}
+.cvb.on{background:var(--sec-c);color:var(--on-sec-c);border-radius:20px 8px 20px 20px;transform:translateX(4px)}
+.cvb.add{background:var(--pri-c);color:var(--on-pri-c)}
+.cvb small{margin-left:auto;font-size:11px;font-weight:400;opacity:.8}
+.cdot{width:10px;height:10px;border-radius:50%;background:var(--warn);flex:none}.cdot.s{background:var(--ok)}
+.ctxt{background:var(--pri-c);color:var(--on-pri-c);border-radius:32px 12px 32px 32px;padding:18px 20px;min-height:230px;max-height:380px;overflow:auto}
+.ctxt.pulse{animation:pop .45s var(--spring)}
+.cvh{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.cvn{font-size:30px;font-weight:500;line-height:1}
+.ctag{font-size:12px;padding:4px 12px;border-radius:999px;background:var(--bg)}
+.ctag.big{color:var(--warn)}.ctag.small{color:var(--ok)}
+.ctxt ul{margin:0;padding:0;list-style:none}
+.ctxt li{display:flex;gap:10px;font-size:14.5px;line-height:1.45;margin:9px 0}
+.ctxt li::before{content:"";width:8px;height:8px;margin-top:7px;border-radius:3px 1px 3px 3px;background:var(--pri);flex:none;transform:rotate(20deg)}
+.ctxt b{font-weight:600}
+.cpt{display:flex;align-items:center;gap:4px}.cpt input{flex:1}
+.ctxt input,.ctxt select{width:100%;margin:4px 0}
+@media(max-width:560px){.csplit{grid-template-columns:1fr}.clist{flex-direction:row;overflow-x:auto;max-height:none}}
+/* ---- depuracion, avisos y suspension ---- */
+.alert.dbg{background:var(--err-c);color:var(--on-err-c)}
+.dwarn{background:var(--err-c);color:var(--on-err-c);padding:10px 14px;border-radius:16px 16px 16px 6px;margin:8px 0;font-size:14px;line-height:1.45}
+.dsec{border-top:1px solid color-mix(in srgb,currentColor 14%,transparent);padding-top:10px;margin-top:14px}
+.dsec h4{margin:0 0 6px}.drow2{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.duser{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:8px 0;border-top:1px solid color-mix(in srgb,currentColor 12%,transparent)}
+.duser .nm{flex:1;min-width:140px}.duser .nm small{display:block;opacity:.7;font-size:12px}
+.dpre{font-family:monospace;font-size:12px;white-space:pre-wrap;background:var(--surf-hi);padding:10px;border-radius:12px;margin:6px 0;text-transform:none}
+.dsec input{width:100%;margin:4px 0}
+#banScreen{position:fixed;inset:0;z-index:100;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:20px}
+#banScreen[hidden]{display:none}
+.bancard{background:var(--err-c);color:var(--on-err-c);border-radius:48px 16px 48px 48px;padding:28px;max-width:520px;width:100%;animation:pop .7s var(--spring)}
+.banhead{display:flex;align-items:center;gap:16px;margin-bottom:16px}
+.banbadge{width:76px;height:76px;background:var(--err);border-radius:30px 12px 30px 30px;display:flex;align-items:center;justify-content:center;flex:none;transform:rotate(-6deg);color:var(--err-c)}
+.banbadge svg{width:42px;height:42px;fill:currentColor;transform:rotate(6deg)}
+.bancard h2{margin:0;font-size:26px;font-weight:500}
+.bancard p{font-size:15.5px;line-height:1.55;margin:0 0 22px}
+.banact{display:flex;justify-content:flex-end}
+.banact .btn{height:52px;padding:0 34px;border-radius:26px 14px 26px 26px;background:var(--err);color:var(--bg);font-size:16px}
+.banact .btn:hover{border-radius:26px}
+#maintScreen{position:fixed;inset:0;z-index:98;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:20px}
+#maintScreen[hidden]{display:none}
+.maintcard{background:var(--warn-c);color:var(--on-warn-c);border-radius:48px 16px 48px 48px;padding:28px;max-width:520px;width:100%;animation:pop .7s var(--spring)}
+.maintcard .banbadge{background:var(--warn);color:var(--warn-c)}
+.maintcard h2{margin:0;font-size:26px;font-weight:500}
+.maintcard p{font-size:15.5px;line-height:1.55;margin:0 0 14px;white-space:pre-wrap}
+.maintEta{display:inline-block;background:var(--bg);color:var(--on-warn-c);border-radius:20px 8px 20px 20px;padding:9px 18px;font-size:14.5px;margin-bottom:20px}
+.maintcard .banact{gap:8px;flex-wrap:wrap}.maintcard .banact .btn{background:var(--warn);color:var(--bg);height:48px;padding:0 26px;border-radius:24px 12px 24px 24px}
+.maintcard .banact .btn.tonal{background:var(--bg);color:var(--on-warn-c);border-radius:24px}
+#impScreen{position:fixed;inset:0;z-index:99;background:var(--scrim);display:flex;align-items:center;justify-content:center;padding:20px}
+#impScreen[hidden]{display:none}
+.impcard{background:var(--warn-c);color:var(--on-warn-c);border-radius:48px 16px 48px 48px;padding:28px;max-width:520px;width:100%;animation:pop .7s var(--spring)}
+.impcard .banbadge{background:var(--warn);color:var(--warn-c)}
+.impcard h2{margin:0;font-size:26px;font-weight:500}
+.impcard p{font-size:15.5px;line-height:1.55;margin:0 0 22px;white-space:pre-wrap}
+.impcard .banact .btn{background:var(--warn);color:var(--bg)}
+.banmini{background:var(--err-c);color:var(--on-err-c);border-radius:28px 10px 28px 28px;padding:12px 16px;margin:6px 0 10px;font-size:13px;line-height:1.4}
+.banmini b{display:block;font-size:16px;font-weight:500;margin-bottom:2px}
+/* ---- automatizaciones y conexiones ---- */
+.sechead{display:flex;align-items:center;gap:12px;margin:6px 0 4px}
+.sechead h3{flex:1;margin:0;font-size:20px;font-weight:500;text-transform:none}
+#clist{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}
+.rootwarn{background:color-mix(in srgb,var(--err) 14%,transparent);border-left:4px solid var(--err);padding:10px 14px;border-radius:12px;margin:12px 0}
+.rootwarn b{font-weight:500;text-transform:none}.rootwarn p{margin:4px 0 0;font-size:13.5px;line-height:1.4}
+#alist{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}
+.acard{background:var(--surf);padding:16px 18px 12px;display:flex;flex-direction:column;gap:6px;border-radius:28px 12px 28px 28px}
+.acard:nth-child(even){border-radius:12px 28px 28px 28px}
+.acard .ahead{display:flex;align-items:center;gap:10px}
+.acard .ahead .at{flex:1;min-width:0;font-size:18px;font-weight:500;text-transform:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.acard .asum{font-size:15px}.acard .asum b{font-weight:500;text-transform:none}
+.acard .aurl{font-size:12px;color:var(--on-var);text-transform:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.acard .ast{font-size:12.5px;color:var(--on-var)}
+.acard .aacts{display:flex;gap:2px;justify-content:flex-end;margin-top:4px}
+.achips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.achips button{padding:4px 12px;border-radius:999px;background:var(--sec-c);color:var(--on-sec-c);font-size:12.5px;text-transform:none}
+.anim>.acard{animation:pop .6s var(--spring) both;animation-delay:calc(var(--i,0)*50ms)}
+@media(max-width:760px){.nav{font-size:11px}.nav i{width:48px}}
+/* ---- widgets y api ---- */
+.sect{margin:0 4px 16px;max-width:640px}
+#wlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.wcard{background:var(--surf);padding:14px;display:flex;flex-direction:column;gap:10px;border-radius:28px 28px 12px 28px}
+.wcard:nth-child(even){border-radius:28px 12px 28px 28px}
+.wprev{background:repeating-conic-gradient(#8882 0 25%,#0000 0 50%) 0 0/16px 16px,var(--surf-hi);border-radius:20px;overflow:hidden;height:190px;display:grid;place-items:center}
+.wprev>div{position:relative}.wprev>div>div{transform-origin:0 0}
+.wmeta{display:flex;align-items:center;gap:8px;padding:0 6px}
+.wmeta .wi{flex:1;min-width:0}
+.wt{font-size:18px;font-weight:500;text-transform:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wsub{font-size:13px;color:var(--on-var)}
+.wcard .chips{margin:0 6px 4px}.wcard .chips span{padding:4px 12px;text-transform:none}
+.krow{display:flex;align-items:center;gap:14px;padding:12px 14px}
+.krow+.krow{border-top:1px solid var(--outline-var)}
+.krow .dav{border-radius:16px;background:var(--ter-c);color:var(--on-ter-c)}
+@media(min-width:900px){#keys.dlist{background:none;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:12px}#keys .krow{background:var(--surf);border-radius:24px;border-top:0}}
+.anim>.wcard,.anim>.krow{animation:pop .6s var(--spring) both;animation-delay:calc(var(--i,0)*50ms)}
+#v-widgets:not([hidden]),#v-conn:not([hidden]),#v-auto:not([hidden]){animation:slide .45s var(--emph)}
+@media(max-width:760px){
+ #app{grid-template-columns:1fr}
+ #rail{position:fixed;left:0;right:0;bottom:0;top:auto;height:auto;flex-direction:row;justify-content:space-around;padding:8px 4px 10px;background:var(--surf);z-index:6}
+ .nav{width:auto;min-width:64px}
+ main{padding:18px 16px 170px}
+ .fab{right:16px;bottom:92px}
+}
+</style></head><body>
+
+<div id="auth" hidden>
+ <div class="card">
+  <div class="blob"><svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6zm9 14H6V10h12v10zm-6-3c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"/></svg></div>
+  <p id="greet"></p>
+  <h2>iniciar sesión</h2>
+  <label for="u" style="margin-top:0">usuario</label><input id="u" autocomplete="username">
+  <label for="p">contraseña</label><input id="p" type="password" autocomplete="current-password">
+  <p id="err"></p>
+  <div class="btns"><button class="btn go" id="bLogin">entrar</button><button class="btn" id="bReg">crear cuenta</button></div>
+  <button class="btn tonal" id="bKey" style="width:100%;margin-top:10px" hidden>entrar con llave de seguridad</button>
+  <div class="langrow"></div>
+ </div>
+</div>
+
+<div id="app" hidden>
+ <nav id="rail" aria-label="secciones">
+  <button class="nav on" data-view="vars"><i data-i="tune"></i>variables</button>
+  <button class="nav" data-view="devs"><i data-i="devices"></i>equipos</button>
+  <button class="nav" data-view="widgets" title="tus widgets"><i data-i="dash"></i>widgets</button>
+  <button class="nav" data-view="auto" title="automatizaciones y llaves de api"><i data-i="bolt"></i>automatizar</button>
+  <button class="nav" data-view="conn" title="conecta tus cuentas de steam y roblox"><i data-i="link"></i>conexiones</button>
+  <button class="nav" data-view="settings" title="ajustes"><i data-i="settings"></i>ajustes</button>
+ </nav>
+ <main>
+  <div class="alert dbg" id="dbgBar" role="status" hidden></div>
+  <div class="alert dbg" id="maintBar" role="status" hidden></div>
+  <div class="alert" id="annBar" role="status" hidden></div>
+  <div class="alert upd" id="updBar" role="alert" hidden></div>
+  <div class="alert lockbar" id="lockBar" hidden></div>
+  <div class="alert" id="betaBar" role="status" hidden><svg viewBox="0 0 24 24"><path d="M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg><span class="grow">beta: este programa está en beta, hay bugs, hay errores, ¡pero espera a que sean resueltos! gracias por usar este programa <span class="u">:D</span></span><button class="tb" id="betaIgn">ignorar</button><button class="ico" id="betaX" aria-label="cerrar" title="cerrar" data-i="close"></button></div>
+  <div class="top">
+   <div class="date" id="date"></div>
+   <div class="who"><button class="avatar" id="avatar" title="cambiar foto de perfil"></button><button class="ico" id="phoneBtn" title="ajustes del teléfono" aria-label="ajustes del teléfono" data-i="tune" hidden></button><button class="ico" id="newsBtn" title="novedades" aria-label="novedades" data-i="spark"></button><button class="ico" id="logout" title="cerrar sesión" aria-label="cerrar sesión" data-i="logout"></button></div>
+  </div>
+  <h1 id="hello">hola</h1>
+  <section id="v-vars">
+   <div class="seg" id="filter"><button data-f="all" class="on">todas</button><button data-f="mine">mías</button><button data-f="shared">compartidas</button></div>
+   <div id="vars"></div>
+  </section>
+  <section id="v-devs" hidden><div class="dlist" id="devices"></div></section>
+  <section id="v-widgets" hidden>
+   <p class="hint sect">en el escritorio, cada widget se muestra en los pcs que marques en el editor. en el teléfono eliges cuál mostrar al colocar el widget «hub» de android.</p>
+   <div id="wlist"></div>
+  </section>
+  <section id="v-settings" hidden>
+   <div class="setcard danger">
+    <h3><svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>aviso de seguridad</h3>
+    <p style="margin:4px 0 0">este programa no está enfocado en seguridad y está hecho con claude como un side project. <b>no guardes información sensible en este sitio.</b></p>
+    <div class="setrow"><div class="grow">mostrar el aviso al abrir el sitio<div class="hint">si lo ignoraste, actívalo para que vuelva a salir.</div></div>
+     <label class="sw"><input type="checkbox" id="phSw"><i></i></label></div>
+    <div class="acts" style="justify-content:flex-start"><button class="btn" id="phNow">ver el aviso ahora</button></div>
+   </div>
+
+   <div class="setcard">
+    <h3>cuenta</h3>
+    <div class="setrow"><div class="av" id="setAv"></div><div class="grow"><b class="u" id="setUser"></b><div class="hint">tu nombre de usuario es con el que otros te comparten variables.</div></div></div>
+    <div class="acts" style="justify-content:flex-start">
+     <button class="btn tonal" id="bPhoto">cambiar foto de perfil</button>
+     <button class="btn tonal" id="bName">cambiar nombre</button>
+     <button class="btn tonal" id="bPw">cambiar contraseña</button>
+    </div>
+   </div>
+
+   <div class="setcard">
+    <h3>idioma</h3>
+    <p class="hint" style="margin:0">elige el idioma de todo el sitio. se recuerda en este dispositivo.</p>
+    <div class="langrow"></div>
+   </div>
+
+   <div class="setcard">
+    <h3>seguridad</h3>
+    <h4>llave de seguridad</h4>
+    <p class="hint" style="margin:0 0 6px">entra con tu huella, el desbloqueo del dispositivo o una llave usb en vez de escribir la contraseña. es solo una comodidad: la contraseña sigue funcionando.</p>
+    <div id="pkList"></div>
+    <p class="hint" id="pkNote"></p>
+    <div class="acts" style="justify-content:flex-start"><button class="btn tonal" id="bPkAdd">añadir llave de seguridad</button></div>
+    <h4>bloqueo de cuenta</h4>
+    <p class="hint" style="margin:0 0 8px">con el bloqueo activo nadie puede cambiar nada de la cuenta (variables, widgets, equipos, llaves api ni estos ajustes) hasta escribir una 2.ª clave; después queda desbloqueada 10 minutos.</p>
+    <div class="setrow" style="margin-top:0"><span class="chip" id="lockChip"></span></div>
+    <div class="acts" style="justify-content:flex-start" id="lockBtns"></div>
+   </div>
+
+   <div class="setcard">
+    <h3>privacidad</h3>
+    <h4>ocultar información</h4>
+    <p class="hint" style="margin:0 0 4px">difumina estos datos en pantalla (toca uno para verlo unos segundos). solo cambia cómo se ve en este dispositivo.</p>
+    <div class="setrow"><div class="grow">llaves api</div><label class="sw"><input type="checkbox" id="hideK"><i></i></label></div>
+    <div class="setrow"><div class="grow">widgets</div><label class="sw"><input type="checkbox" id="hideW"><i></i></label></div>
+    <div class="setrow"><div class="grow">nombres de equipos</div><label class="sw"><input type="checkbox" id="hideD"><i></i></label></div>
+    <div class="setrow"><div class="grow">direcciones de webhooks</div><label class="sw"><input type="checkbox" id="hideA"><i></i></label></div>
+   </div>
+
+   <div class="setcard">
+    <h3>popups</h3>
+    <p class="hint" style="margin:0">avisos que salen al abrir el sitio. el aviso de seguridad está arriba del todo porque es importante.</p>
+    <h4>información</h4>
+    <div class="setrow" style="margin-top:6px"><div class="grow">aviso de beta<div class="hint">la barra azul que avisa de que el programa está en beta.</div></div>
+     <label class="sw"><input type="checkbox" id="betaSw"><i></i></label></div>
+    <div class="acts" style="justify-content:flex-start"><button class="btn tonal" id="betaNow">ver el aviso ahora</button></div>
+   </div>
+
+   <div class="setcard">
+    <h3>versiones</h3>
+    <p class="hint" style="margin:0">el sitio sube a 1.3.1 con cambios cosméticos (todo sigue funcionando) y a 1.4 cuando necesita que las apps hagan algo más; entonces te avisamos de los dispositivos que hay que actualizar.</p>
+    <div id="verList"></div>
+    <div class="acts" style="justify-content:flex-start"><button class="btn tonal" id="bNews">ver novedades</button></div>
+   </div>
+
+   <div class="setcard" id="dbgCard" hidden>
+    <h3>modo de depuración</h3>
+    <p class="hint" style="margin:0 0 8px">aquí podrás depurar todos los popups, pestañas, versiones, cosas como esas. si puedes ver este menú, fuiste seleccionado y puedes dar acciones a otras personas. si tú hosteas el servidor, puedes cambiar quién tiene acceso al momento de crear la primera cuenta, a la que se le dará depuración.</p>
+    <div class="dwarn"><b>esto puede perfectamente romper tu usuario, y sin chance de recuperarlo.</b> si te dieron acceso pero no sabes lo que haces, <b>no actives este modo.</b></div>
+    <div class="acts" style="justify-content:flex-start"><button class="btn danger" id="dbgOn">activar modo de depuración</button><button class="btn" id="dbgOff">salir</button></div>
+   </div>
+   <div class="setcard" id="dbgPanel" hidden></div>
+  </section>
+  <section id="v-auto" hidden>
+   <div class="sechead"><h3>automatizaciones</h3><button class="btn tonal" id="addAuto">nueva automatización</button></div>
+   <p class="hint sect">manda un aviso (por ejemplo a discord) cuando una variable cumpla una condición, como «batería = 100».</p>
+   <div id="alist"></div>
+   <div class="sechead" style="margin-top:34px"><h3>llaves api</h3><button class="btn tonal" id="addKey">nueva llave</button></div>
+   <p class="hint sect">con una llave, cualquier app o script puede crear y actualizar tus variables de tipo mensaje.</p>
+   <div class="dlist" id="keys"></div>
+   <div id="apiHelp"></div>
+  </section>
+  <section id="v-conn" hidden>
+   <p class="hint sect">conecta tus cuentas para usar sus datos públicos como variables, aunque no haya ningún pc encendido. nunca pedimos contraseñas.</p>
+   <div id="clist"></div>
+  </section>
+ </main>
+ <button class="fab" id="addVar"><span data-i="add"></span>nueva variable</button>
+ <button class="fab" id="addDev" hidden><span data-i="add"></span>añadir equipo</button>
+ <button class="fab" id="addW" hidden><span data-i="add"></span>nuevo widget</button>
+</div>
+
+<div id="banScreen" hidden><div class="bancard">
+ <div class="banhead"><span class="banbadge" data-i="warn"></span><h2>cuenta suspendida</h2></div>
+ <p>esta cuenta se ha cerrado permanentemente y es inaccesible, cualquier acto de intentar tumbar el sitio o ilegal resultará en este mismo castigo, tu ip y dispositivo han sido prohibidos de acceder al sitio web, gracias por entender.</p>
+ <div class="banact"><button class="btn" id="banExit">salir</button></div>
+</div></div>
+<div id="maintScreen" hidden><div class="maintcard">
+ <div class="banhead"><span class="banbadge" data-i="build"></span><h2>estamos en mantenimiento</h2></div>
+ <p id="maintTxt" class="u"></p>
+ <div class="maintEta" id="maintEta"></div>
+ <div class="banact"><button class="btn tonal" id="maintDbg">entrar como depurador</button><button class="btn" id="maintRetry">reintentar</button></div>
+</div></div>
+<div id="impScreen" hidden><div class="impcard">
+ <div class="banhead"><span class="banbadge" data-i="warn"></span><h2>aviso importante</h2></div>
+ <p id="impTxt" class="u"></p>
+ <div class="banact"><button class="btn" id="impOk">entendido</button></div>
+</div></div>
+<dialog id="dlg"></dialog><div id="toast"></div>
+<input type="file" id="pick" accept="image/*" hidden>
+
+<script src="/i18n.js"></script>
+<script src="/widget.js"></script>
+<script>
+const $=s=>document.querySelector(s);
+function h(tag,attrs,...kids){
+ const e=document.createElement(tag);
+ for(const[k,v]of Object.entries(attrs||{})){
+  if(k.startsWith("on"))e.addEventListener(k.slice(2),v);
+  else if(k==="class")e.className=v;
+  else if(v!==false&&v!=null)e.setAttribute(k,v)}
+ for(const c of kids.flat()){if(c===false||c==null)continue;e.append(c.nodeType?c:document.createTextNode(c))}
+ return e}
+const ICON={
+ pencil:"M3 17.25V21h3.75L17.8 9.94l-3.75-3.75L3 17.25zM20.7 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z",
+ trash:"M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z",
+ share:"M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z",
+ person:"M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z",
+ add:"M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z",
+ tune:"M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z",
+ devices:"M4 6h18V4H4c-1.1 0-2 .9-2 2v11H0v3h14v-3H4V6zm19 2h-6c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h6c.55 0 1-.45 1-1V9c0-.55-.45-1-1-1zm-1 9h-4v-7h4v7z",
+ dash:"M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z",
+ settings:"M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z",
+ key:"M12.65 10C11.83 7.67 9.61 6 7 6c-3.31 0-6 2.69-6 6s2.69 6 6 6c2.61 0 4.83-1.67 5.65-4H17v4h4v-4h2v-4H12.65zM7 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z",
+ build:"M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.9 4.9C.8 7.3 1.2 10.2 3.2 12.2c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.1-2.1c.5-.4.5-1 0-1.7z",
+ spark:"M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25L19 15z",
+ logout:"M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z",
+ computer:"M20 18c1.1 0 1.99-.9 1.99-2L22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2H0v2h24v-2h-4zM4 6h16v10H4V6z",
+ bolt:"M7 2v11h3v9l7-12h-4l4-8z",
+ link:"M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z",
+ lock:"M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z",
+ close:"M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z",
+ warn:"M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z",
+ phone:"M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z"};
+const svg=n=>`<svg viewBox="0 0 24 24"><path d="${ICON[n]}"/></svg>`;
+function ico(name,title,fn,cls){
+ title=String(title).toLowerCase();
+ const b=h("button",{class:"ico "+(cls||""),title,"aria-label":title,onclick:fn});
+ b.innerHTML=svg(name);return b}
+document.addEventListener("pointerdown",e=>{const b=e.target.closest("button");if(!b||b.disabled)return;
+ const r=b.getBoundingClientRect(),d=Math.max(r.width,r.height)*2.2,x=document.createElement("span");
+ x.className="rip";x.style.cssText=`width:${d}px;height:${d}px;left:${e.clientX-r.left-d/2}px;top:${e.clientY-r.top-d/2}px`;
+ b.appendChild(x);setTimeout(()=>x.remove(),700)});
+document.querySelectorAll("[data-i]").forEach(e=>e.innerHTML=svg(e.dataset.i)+(e.classList.contains("fab")?"":""));
+
+let ws,S=null,token=null,retry,view="vars",filter="all",anim=true;
+const UA=navigator.userAgent;
+const OS=/Android/.test(UA)?"Android":/Windows/.test(UA)?"Windows":/Mac/.test(UA)?"Mac":/Linux/.test(UA)?"Linux":"Navegador";
+const DEVICE_ID=(()=>{try{let d=localStorage.getItem("device_id");if(!d){
+ d=[...crypto.getRandomValues(new Uint8Array(8))].map(b=>b.toString(16).padStart(2,"0")).join("");
+ localStorage.setItem("device_id",d)}return d}catch{return "tmp"+Math.random().toString(16).slice(2,10)}})();
+const send=o=>ws&&ws.readyState==1&&ws.send(JSON.stringify(o));
+
+function toast(t){const e=$("#toast");e.textContent=t;e.style.display="block";clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display="none",4000)}
+const greeting=()=>{const H=new Date().getHours();return H<12?"buenos días":H<20?"buenas tardes":"buenas noches"};
+
+/* ---------- sesion ---------- */
+async function auth(kind){
+ $("#err").textContent="";
+ try{
+  const r=await fetch("/api/"+kind,{method:"POST",headers:{"Content-Type":"application/json"},
+   body:JSON.stringify({user:$("#u").value,password:$("#p").value})});
+  const d=await r.json();
+  if(!r.ok){if(d.banned){showBanned();return}if(d.maintenance){M=d.maintenance;maintPass=false;renderMaint();return}$("#err").textContent=d.error;return}
+  try{localStorage.setItem("token",d.token)}catch{}
+  $("#p").value="";connect(d.token)
+ }catch{$("#err").textContent="No se pudo contactar con el servidor"}}
+function show(inside){$("#auth").hidden=inside;$("#app").hidden=!inside;$("#greet").textContent=greeting()}
+function connect(tok){
+ token=tok;clearTimeout(retry);
+ ws=new WebSocket((location.protocol=="https:"?"wss://":"ws://")+location.host+"/ws");
+ ws.onopen=()=>{send({type:"auth",token:tok});
+  send({type:"hello",device_id:DEVICE_ID,name:(OS=="Navegador"?"Navegador":OS+(OS=="Android"?"":" (web)")).toLowerCase(),platform:OS,kind:"web"})};
+ ws.onclose=()=>{if(token)retry=setTimeout(()=>connect(token),3000)};
+ ws.onmessage=e=>onMsg(JSON.parse(e.data))}
+function logout(){token=null;try{localStorage.removeItem("token")}catch{}if(ws)ws.close();S=null;show(false)}
+
+function onMsg(m){
+ if(m.type=="auth_error"){token=null;try{localStorage.removeItem("token")}catch{}show(false);return}
+ if(m.type=="kick"){logout();toast("este dispositivo se eliminó de la cuenta: sesión cerrada");return}
+ if(m.type=="important"){showImp(m.important);return}
+ if(m.type=="maintenance"){M=m.maintenance||null;if(!M)maintPass=false;renderMaint();if(S)renderDebug();return}
+ if(m.type=="state"){S=m;M=m.maintenance||null;showImp(m.important);renderMaint();lockAt=Date.now();show(true);render();if(active)active();
+  if(!window.__hv){window.__hv=1;const v=new URLSearchParams(location.search).get("view");if(v&&["vars","devs","widgets","auto","conn","settings"].includes(v))setView(v)}return}
+ if(m.type=="result"){const f=pend[m.op];if(f){delete pend[m.op];f(m)}else if(m.text)toast(m.text);return}
+ if(m.type=="locked"){toast("cuenta bloqueada: confirma con tu 2.ª clave");unlockModal();return}
+ if(m.type=="values"&&S){
+  for(const[id,v]of Object.entries(m.vars)){const x=S.variables.find(a=>a.id==id);if(x){x.value=v.value;x.online=v.online}}
+  document.querySelectorAll("[data-vid]").forEach(el=>{const x=S.variables.find(a=>a.id==el.dataset.vid);if(x)el.textContent=fmt(x)});return}
+ if(m.type=="banned"){showBanned();return}
+ if(m.type=="announce"&&S){S.announce=m.announce;renderAnn();return}
+ if(m.type=="dbg_users"){DBG.users=m.users;renderDebug();return}
+ if(m.type=="dbg_status"){DBG.status=m.data;renderDebug();return}
+ if(m.type=="toast")toast(m.text);
+ if(m.type=="key_created")showKey(m);
+ if(m.type=="avatar_candidate")shrink(m.data).then(d=>send({type:"set_avatar",data:d}))}
+
+/* ---------- render ---------- */
+const UNIT={ram:"%",cpu:"%",uptime:" h",steam_hours:" h",steam_hours2w:" h",battery:"%",heart_rate:" lpm",sleep_hours:" h",distance_km:" km",calories:" kcal",
+ disk:"%",gpu:"%",net_down:" KB/s",net_up:" KB/s",cpu_temp:" °C",volume:"%",storage:"%",ram_free:"%",battery_temp:" °C",
+ root_cpu_temp:" °C",root_bat_current:" mA",root_bat_voltage:" mV",root_cpu_freq:" MHz"},
+PC_M=["ram","cpu","uptime","disk","net_down","net_up","cpu_temp","gpu","procs","volume","locked","app","apptime"],
+PHONE_M=["battery","charging","storage","ram_free","net_type","battery_temp","steps","heart_rate","sleep_hours","distance_km","calories"],
+ROOT_M=["root_cpu_temp","root_bat_current","root_bat_voltage","root_bat_cycles","root_cpu_freq"],
+TXT_M=["locked","charging","net_type"],
+METRIC={ram:"Uso de RAM (%)",cpu:"Uso de CPU (%)",uptime:"Tiempo encendido (horas)",app:"App activa ahora",
+ apptime:"Tiempo de hoy en una app",steam_game:"Steam: juego actual",steam_hours:"Steam: horas totales",
+ steam_hours2w:"Steam: horas últimas 2 semanas",roblox_friends:"Roblox: amigos",roblox_followers:"Roblox: seguidores",
+ roblox_visits:"Roblox: visitas a tus juegos",
+ battery:"Teléfono: batería (%)",steps:"Teléfono: pasos de hoy",heart_rate:"Teléfono: pulso (lpm)",
+ sleep_hours:"Teléfono: horas de sueño",distance_km:"Teléfono: distancia de hoy (km)",calories:"Teléfono: calorías activas de hoy",
+ disk:"Uso del disco (%)",net_down:"Red: bajada (KB/s)",net_up:"Red: subida (KB/s)",cpu_temp:"Temperatura de la CPU (°C)",gpu:"Uso de la GPU (%)",
+ procs:"Procesos abiertos",volume:"Volumen del sistema (%)",locked:"Sesión bloqueada",
+ charging:"Teléfono: cargando",storage:"Teléfono: almacenamiento usado (%)",ram_free:"Teléfono: RAM libre (%)",net_type:"Teléfono: tipo de conexión",
+ battery_temp:"Teléfono: temperatura de la batería (°C)",
+ root_cpu_temp:"Root: temperatura de la CPU (°C)",root_bat_current:"Root: corriente de la batería (mA)",root_bat_voltage:"Root: voltaje de la batería (mV)",
+ root_bat_cycles:"Root: ciclos de carga de la batería",root_cpu_freq:"Root: frecuencia de la CPU (MHz)"};
+for(const k in METRIC)METRIC[k]=METRIC[k].toLowerCase();
+function fmt(v){
+ if(v.kind!="auto")return v.value||"";if(!v.online)return "sin conexión";if(v.value==null)return "—";
+ if(v.metric=="apptime")return v.value>=60?Math.floor(v.value/60)+" h "+v.value%60+" min":v.value+" min";
+ if(TXT_M.includes(v.metric))return T(String(v.value));
+ return v.value+(UNIT[v.metric]||"")}
+
+const SHAPES=["28px 28px 28px 8px","28px 8px 28px 28px","8px 28px 28px 28px","28px 28px 8px 28px"];
+function setView(v){
+ view=v;anim=true;
+ for(const k of["vars","devs","widgets","auto","conn","settings"])$("#v-"+k).hidden=v!=k;
+ $("#addVar").hidden=v!="vars";$("#addDev").hidden=v!="devs";$("#addW").hidden=v!="widgets";
+ document.querySelectorAll(".nav[data-view]").forEach(n=>n.classList.toggle("on",n.dataset.view==v));
+ if(S)render()}
+
+/* ---------- ajustes de cuenta, seguridad y privacidad ---------- */
+let lockAt=0,lockSig="";const pend={};
+function ask(op,msg){return new Promise(r=>{pend[op]=r;send({type:op,...msg});
+ setTimeout(()=>{if(pend[op]===r){delete pend[op];r({ok:false,text:"sin respuesta del servidor"})}},15000)})}
+const lockOn=()=>!!(S&&S.me.lock&&S.me.lock.enabled);
+const lockLeft=()=>S&&S.me.lock?Math.max(0,S.me.lock.left-(Date.now()-lockAt)/1000):0;
+const mmss=t=>Math.floor(t/60)+":"+String(Math.floor(t%60)).padStart(2,"0");
+
+function formModal(title,hint,fields,label,op,build,cls){
+ const inputs=fields.map(f=>h("input",{type:f.type||"text",placeholder:f.ph||"",maxlength:100,autocomplete:"off",spellcheck:false}));
+ const err=h("p",{class:"hint",style:"color:var(--err);min-height:1.3em;margin:8px 4px 0"});
+ const go=async()=>{err.textContent="";const o=build(inputs.map(i=>i.value));
+  if(typeof o=="string"){err.textContent=o;return}
+  err.style.color="var(--on-var)";err.textContent="un momento…";
+  const r=await ask(op,o);err.style.color="var(--err)";
+  if(r.ok){dlg.close();toast(r.text)}else err.textContent=r.text};
+ inputs.forEach(i=>i.addEventListener("keydown",e=>e.key=="Enter"&&go()));
+ modal(title,h("div",{},hint&&h("p",{class:"hint"},hint),...fields.flatMap((f,i)=>[h("label",{},f.label),inputs[i]]),err),
+  h("button",{class:"btn "+(cls||"go"),onclick:go},label));
+ inputs[0].focus()}
+
+function unlockModal(){
+ formModal("Desbloquear cuenta","Escribe tu 2.ª clave. La cuenta queda desbloqueada 10 minutos.",[{label:"2.ª clave",type:"password"}],"Desbloquear","unlock",([k])=>k?{key:k}:"escribe la clave")}
+function changeName(){
+ formModal("Cambiar nombre","Cambia tu nombre de usuario. Las cuentas con las que compartes verán el nombre nuevo, y la conexión se reinicia sola.",
+  [{label:"Nombre nuevo"},{label:"Contraseña actual",type:"password"}],"Cambiar","change_name",([n,p])=>n.trim().length<3?"mínimo 3 caracteres":!p?"escribe tu contraseña":{name:n,password:p})}
+function changePw(){
+ formModal("Cambiar contraseña","",[{label:"Contraseña actual",type:"password"},{label:"Contraseña nueva (mínimo 8)",type:"password"},{label:"Repite la nueva",type:"password"}],
+  "Cambiar","change_password",([a,b,c])=>!a?"escribe tu contraseña actual":b.length<8?"la nueva debe tener al menos 8 caracteres":b!==c?"las contraseñas nuevas no coinciden":{password:a,new:b})}
+function lockSet(change){
+ formModal(change?"Cambiar 2.ª clave":"Activar bloqueo de cuenta","Con el bloqueo activo, cualquier cambio de la cuenta pedirá esta 2.ª clave. Debe ser distinta de tu contraseña.",
+  [{label:"Contraseña de la cuenta",type:"password"},{label:"2.ª clave (mínimo 6)",type:"password"},{label:"Repite la 2.ª clave",type:"password"}],
+  change?"Cambiar":"Activar","lock_set",([p,a,b])=>!p?"escribe la contraseña de la cuenta":a.length<6?"la 2.ª clave debe tener al menos 6 caracteres":a!==b?"las claves no coinciden":{password:p,key:a})}
+function lockDisable(){
+ formModal("Desactivar bloqueo","La cuenta dejará de pedir la 2.ª clave.",[{label:"Contraseña de la cuenta",type:"password"}],"Desactivar","lock_disable",([p])=>p?{password:p}:"escribe la contraseña de la cuenta","go")}
+
+/* llaves de seguridad (passkeys, WebAuthn) */
+const b64u=b=>btoa(String.fromCharCode(...new Uint8Array(b))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+const unb64u=t=>Uint8Array.from(atob(t.replace(/-/g,"+").replace(/_/g,"/")+"=".repeat((4-t.length%4)%4)),c=>c.charCodeAt(0));
+const pkSupport=()=>!window.HubApp&&!!window.PublicKeyCredential&&window.isSecureContext;
+async function passkeyAdd(label){
+ try{
+  const o=await(await fetch("/api/passkey/register/begin",{method:"POST",headers:{Authorization:"Bearer "+token}})).json();
+  if(o.error)return toast(o.error);
+  const cred=await navigator.credentials.create({publicKey:{challenge:unb64u(o.challenge),rp:o.rp,user:{id:unb64u(o.user.id),name:o.user.name,displayName:o.user.displayName},
+   pubKeyCredParams:o.pubKeyCredParams,authenticatorSelection:o.authenticatorSelection,attestation:"none",timeout:60000,
+   excludeCredentials:o.excludeCredentials.map(c=>({type:"public-key",id:unb64u(c.id)}))}});
+  const r=await fetch("/api/passkey/register/finish",{method:"POST",headers:{Authorization:"Bearer "+token,"Content-Type":"application/json"},
+   body:JSON.stringify({rawId:b64u(cred.rawId),label,response:{clientDataJSON:b64u(cred.response.clientDataJSON),attestationObject:b64u(cred.response.attestationObject)}})});
+  const d=await r.json();toast(r.ok?"llave de seguridad añadida":d.error)
+ }catch(e){toast(e.name=="NotAllowedError"?"cancelaste o se agotó el tiempo":"no se pudo crear la llave: "+e.message)}}
+function passkeyModal(){
+ const name=h("input",{placeholder:"nombre (ej. mi portátil)",maxlength:40});
+ modal("Añadir llave de seguridad",h("div",{},h("p",{class:"hint"},"Después de continuar, tu dispositivo te pedirá huella, PIN o la llave usb."),h("label",{},"Nombre"),name),
+  h("button",{class:"btn go",onclick:()=>{const l=name.value.trim()||"mi llave";dlg.close();passkeyAdd(l)}},"Continuar"))}
+async function passkeyLogin(){
+ $("#err").textContent="";
+ try{
+  const o=await(await fetch("/api/passkey/login/begin",{method:"POST"})).json();
+  if(o.error){$("#err").textContent=o.error;return}
+  const a=await navigator.credentials.get({publicKey:{challenge:unb64u(o.challenge),rpId:o.rpId,userVerification:"preferred",timeout:60000}});
+  const r=await fetch("/api/passkey/login/finish",{method:"POST",headers:{"Content-Type":"application/json"},
+   body:JSON.stringify({rawId:b64u(a.rawId),response:{clientDataJSON:b64u(a.response.clientDataJSON),authenticatorData:b64u(a.response.authenticatorData),signature:b64u(a.response.signature)}})});
+  const d=await r.json();if(!r.ok){if(d.banned){showBanned();return}if(d.maintenance){M=d.maintenance;maintPass=false;renderMaint();return}$("#err").textContent=d.error;return}
+  try{localStorage.setItem("token",d.token)}catch{}connect(d.token)
+ }catch(e){$("#err").textContent=e.name=="NotAllowedError"?"cancelaste o se agotó el tiempo":"no se pudo usar la llave"}}
+
+/* ocultar información (solo visual, por dispositivo) */
+const HIDE_SEL={ha:".acard .aurl",hk:".krow .dinfo",hw:".wcard .wprev,.wcard .wt,.wcard .wsub,.wcard .chips",hd:"#devices .dname,#devices .dsub,.wcard .chips"};
+const hideGet=()=>{try{return JSON.parse(localStorage.getItem("hide")||"{}")}catch{return{}}};
+function hideApply(){const c=hideGet();for(const k of["hk","hw","hd","ha"])document.body.classList.toggle(k,!!c[k])}
+function hideSet(k,on){const c=hideGet();c[k]=on;try{localStorage.setItem("hide",JSON.stringify(c))}catch{}hideApply()}
+document.addEventListener("click",e=>{for(const k in HIDE_SEL){if(!document.body.classList.contains(k))continue;
+ const t=e.target.closest(HIDE_SEL[k]);if(t&&!t.classList.contains("rev")){t.classList.add("rev");setTimeout(()=>t.classList.remove("rev"),8000);e.preventDefault();e.stopPropagation();return}}},true);
+
+/* pintar ajustes y la barra de bloqueo */
+function renderSettings(){
+ if(!S)return;const me=S.me;
+ $("#setUser").textContent=me.user;
+ const av=$("#setAv");av.style.backgroundImage=me.avatar?`url(${me.avatar})`:"";av.textContent=me.avatar?"":me.user[0];
+ // llaves de seguridad
+ const pks=me.passkeys||[],sup=pkSupport();
+ $("#pkList").replaceChildren(...pks.map(k=>h("div",{class:"pkrow"},h("span",{},k.label),
+  ico("trash","Quitar llave",()=>{if(confirm("¿quitar esta llave de seguridad?"))send({type:"passkey_delete",id:k.id})},"red"))));
+ $("#pkNote").textContent=window.HubApp?"las llaves de seguridad no funcionan dentro de la app; úsalas desde el navegador.":
+  !me.passkey_ok?"el servidor necesita el paquete «cryptography» para usar llaves de seguridad.":
+  !sup?"tu navegador solo permite llaves de seguridad en https o en localhost.":pks.length?"":"todavía no tienes ninguna.";
+ $("#bPkAdd").disabled=!sup||!me.passkey_ok;
+ // bloqueo
+ const on=lockOn(),open=lockLeft()>0,sig=on+"|"+open;
+ if(sig!==lockSig){lockSig=sig;
+  const b=$("#lockBtns"),btn=(t,fn,c)=>h("button",{class:"btn "+(c||"tonal"),onclick:fn},t);
+  b.replaceChildren(...(!on?[btn("activar bloqueo",()=>lockSet(false))]:open?
+   [btn("bloquear ahora",()=>send({type:"lock_now"})),btn("cambiar 2.ª clave",()=>lockSet(true)),btn("desactivar bloqueo",lockDisable)]:[btn("desbloquear",unlockModal,"go")]))}
+ const chip=$("#lockChip");chip.className="chip "+(!on?"":open?"ok":"bad");
+ chip.textContent=!on?"desactivado":open?"desbloqueada · "+mmss(lockLeft()):"bloqueada"}
+function renderLockBar(){
+ const b=$("#lockBar");if(!S||!lockOn()){b.hidden=true;return}
+ const open=lockLeft()>0;b.hidden=false;b.className="alert lockbar"+(open?" open":"");
+ const icon=h("span");icon.innerHTML=svg("lock");
+ b.replaceChildren(icon.firstChild,h("span",{class:"grow"},open?"cuenta desbloqueada: quedan "+mmss(lockLeft()):"cuenta bloqueada: los cambios están desactivados"),
+  h("button",{class:"tb",onclick:()=>open?send({type:"lock_now"}):unlockModal()},open?"bloquear ahora":"desbloquear"))}
+setInterval(()=>{if(S){renderLockBar();const c=$("#lockChip");if(c&&lockOn()&&lockLeft()>0)c.textContent="desbloqueada · "+mmss(lockLeft());
+ const open=lockLeft()>0;if(lockSig!==lockOn()+"|"+open)renderSettings()}},1000);
+
+/* ---------- versiones ---------- */
+const verLvl=v=>{const m=/^(\d+)\.(\d+)/.exec(v||"");return m?[+m[1],+m[2]]:[0,0]};
+const verOld=(c,s)=>{const a=verLvl(c),b=verLvl(s);return a[0]<b[0]||(a[0]==b[0]&&a[1]<b[1])};
+function renderVersions(){
+ if(!S)return;
+ const agents=S.devices.filter(d=>d.mine&&d.kind=="agent"),old=agents.filter(d=>verOld(d.client_version,dbgVer||S.version));
+ const bar=$("#updBar");
+ if(!old.length)bar.hidden=true;
+ else{bar.hidden=false;const icon=h("span");icon.innerHTML=svg("warn");
+  bar.replaceChildren(icon.firstChild,h("div",{class:"grow"},h("b",{},"actualización grande"),
+   "el cliente se actualizó a una versión mayor, y hay dispositivos tuyos que no tienen las funciones más nuevas, actualiza el cliente en esos dispositivos.",
+   ...old.map(d=>{
+    const can=!verOld(d.client_version,"1.4"),apk=/android/i.test(d.platform);   // desde la 1.4 los clientes entienden la orden de actualizarse
+    const act=can?h("button",{class:"btn",disabled:!d.online,title:d.online?"actualizar este equipo":"conéctalo primero",onclick:()=>send({type:"update_device",device_id:d.id})},"actualizar"):
+     h("a",{class:"btn",href:apk?"/hub.apk":"/agent.py",download:apk?"hub.apk":"agent.py",title:"este equipo es muy antiguo para actualizarse solo: descarga e instala la versión nueva"},"descargar");
+    return h("div",{class:"updrow"},h("span",{},d.name+" ("+(d.client_version?"v"+d.client_version:T("sin versión"))+")"+(d.online?"":T(" · desconectado"))),act)})))}
+ $("#verList").replaceChildren(h("div",{class:"setrow"},h("div",{class:"grow"},"sitio"),h("span",{class:"chip ok"},"v"+S.version)),
+  ...agents.map(d=>h("div",{class:"setrow",style:"margin:6px 0"},h("div",{class:"grow u"},d.name+(d.platform?" · "+d.platform:"")),
+   h("span",{class:"chip"+(verOld(d.client_version,dbgVer||S.version)?" bad":" ok")},d.client_version?"v"+d.client_version:T("sin versión")))))}
+
+const T=s=>HubI18n.tr(s);
+function langRows(){document.querySelectorAll(".langrow").forEach(r=>r.replaceChildren(...HubI18n.LANGS.map(l=>
+ h("button",{class:"btn u "+(HubI18n.lang()==l?"go":"tonal"),onclick:()=>HubI18n.setLang(l)},HubI18n.NAMES[l]))))}
+HubI18n.listeners.push(()=>{langRows();if(typeof S!="undefined"&&S)render()});
+langRows();
+/* ---------- automatizaciones ---------- */
+const OPS=[["eq","es igual a"],["ne","es distinto de"],["gt","es mayor que"],["lt","es menor que"],["ge","es mayor o igual que"],["le","es menor o igual que"],
+ ["contains","contiene"],["starts","empieza por"],["changes","cambia"]];
+const opLabel=o=>(OPS.find(x=>x[0]==o)||[0,o])[1];
+function renderAutos(){
+ const list=S.automations||[];
+ const cards=list.map((a,i)=>{
+  const v=S.variables.find(x=>x.id==a.var_id),vn=v?v.name:"?";
+  let host="";try{host=new URL(a.url).hostname}catch{}
+  const st=a.last_fired?T("último aviso:")+" "+new Date(a.last_fired*1000).toLocaleString(HubI18n.locale(),{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})+(a.last_status?" · "+T(a.last_status):""):T("todavía no ha avisado");
+  const sw=h("label",{class:"sw",title:T(a.enabled?"activa":"pausada")},h("input",{type:"checkbox",checked:a.enabled,onchange:e=>send({type:"automation_toggle",id:a.id,enabled:e.target.checked})}),h("i"));
+  return h("div",{class:"acard",style:"--i:"+i},
+   h("div",{class:"ahead"},h("div",{class:"at"},a.name),sw),
+   h("div",{class:"asum"},T("si")+" ",h("b",{class:"u"},vn)," "+T(opLabel(a.op))+(a.op=="changes"?"":" "),a.op=="changes"?null:h("b",{class:"u"},a.value)),
+   h("div",{class:"ast"},T("avisa a")+" "+T(a.kind=="discord"?"discord":"un webhook")+" · ",h("span",{class:"aurl u"},host)),
+   h("div",{class:"ast"},st),
+   h("div",{class:"aacts"},ico("bolt","Probar ahora",()=>send({type:"automation_test",id:a.id})),ico("pencil","Editar",()=>autoModal(a)),
+    ico("trash","Eliminar",()=>{if(confirm(`¿eliminar «${a.name}»?`))send({type:"automation_delete",id:a.id})},"red")))});
+ $("#alist").replaceChildren(...(cards.length?cards:[h("div",{class:"empty",style:"grid-column:1/-1"},"aún no tienes automatizaciones. crea una con «nueva automatización».")]));
+ $("#alist").classList.toggle("anim",anim)}
+function autoModal(a){
+ const mine=S.variables.filter(v=>v.mine);
+ if(!mine.length)return toast(T("primero crea una variable"));
+ const name=h("input",{maxlength:40,placeholder:T("ej. batería llena"),value:a?a.name:""});
+ const vsel=h("select",{},mine.map(v=>h("option",{value:v.id,selected:a&&a.var_id==v.id},v.name)));
+ const op=h("select",{},OPS.map(([k,t])=>h("option",{value:k,selected:a&&a.op==k},t)));
+ const val=h("input",{maxlength:80,placeholder:T("valor, ej. 100"),value:a?a.value:""}),valBox=h("div",{},h("label",{},"Valor"),val);
+ const kind=h("select",{},[["discord","Discord"],["webhook","Webhook genérico"]].map(([k,t])=>h("option",{value:k,selected:a&&a.kind==k},t)));
+ const url=h("input",{maxlength:500,placeholder:"https://…",value:a?a.url:"",autocomplete:"off",spellcheck:false,class:"u"});
+ const body=h("textarea",{rows:4,maxlength:2000,class:"u"});body.value=a?a.body:"";
+ const cool=h("input",{type:"number",min:10,max:86400,value:a?a.cooldown:60});
+ const err=h("p",{class:"hint",style:"color:var(--err);min-height:1.3em;margin:8px 4px 0"});
+ const hint=h("p",{class:"hint"});
+ const chips=h("div",{class:"achips"});
+ const insert=t=>{const i=body.selectionStart??body.value.length;body.value=body.value.slice(0,i)+"{"+t+"}"+body.value.slice(body.selectionEnd??i);body.focus()};
+ const sync=()=>{
+  valBox.hidden=op.value=="changes";
+  hint.textContent=T(kind.value=="discord"?"pega la dirección del webhook de discord (ajustes del canal → integraciones → webhooks). el mensaje puede llevar {variables}.":"se manda un post con json a esa dirección. escribe el cuerpo en json; puedes usar {variables}. si lo dejas vacío se manda un resumen.");
+  body.placeholder=kind.value=="discord"?T("ej. ¡{valor}!"):'{"texto": "{variable} llegó a {valor}"}';
+  chips.replaceChildren(...["valor","variable","hora",...mine.map(v=>v.name)].map(t=>h("button",{type:"button",onclick:()=>insert(t)},"{"+t+"}")))};
+ op.onchange=kind.onchange=sync;sync();
+ modal(a?"Editar automatización":"Nueva automatización",h("div",{},
+  h("label",{style:"margin-top:0"},"Nombre"),name,
+  h("label",{},"Cuando esta variable…"),vsel,op,valBox,
+  h("label",{},"Avisar a"),kind,h("label",{},"Dirección del webhook"),url,
+  h("label",{},"Mensaje"),body,chips,hint,
+  h("label",{},"Esperar al menos (segundos) entre avisos"),cool,
+  h("p",{class:"hint"},"Si tienes un dispositivo conectado con la versión 1.5 o más, el aviso sale desde él (así puedes llamar a tu red local); si no, sale desde el servidor, que solo acepta direcciones https públicas."),err),
+  h("button",{class:"btn go",onclick:()=>{
+   err.textContent="";pend.automation=r=>{if(r.ok){dlg.close();toast(r.text)}else err.textContent=r.text};
+   send({type:"automation_save",id:a?a.id:null,name:name.value,var_id:+vsel.value,op:op.value,value:val.value,kind:kind.value,url:url.value,body:body.value,cooldown:+cool.value})}},"Guardar"));
+ name.focus()}
+
+/* ---------- suspension, avisos globales y depuracion ---------- */
+let dbgVer=null,dbgEmpty=false;const DBG={users:[],status:null,loaded:false};
+function showBanned(preview){
+ $("#banScreen").hidden=false;
+ $("#banExit").onclick=preview?()=>{$("#banScreen").hidden=true}:()=>{try{localStorage.removeItem("token")}catch{}token=null;if(ws)ws.close();location.reload()};
+ if(!preview){token=null;clearTimeout(retry);try{if(ws)ws.close()}catch{}}}
+fetch("/api/ban").then(r=>r.json()).then(d=>{if(d.banned)showBanned()}).catch(()=>{});
+let M=null,maintPass=false,maintPrev=false;
+const hhmm=t=>new Date(t*1000).toLocaleTimeString(HubI18n.locale(),{hour:"2-digit",minute:"2-digit"});
+function maintLive(){return M&&(!M.until||M.until*1000>Date.now())?M:null}
+function maintEtaText(m){if(!m.until)return"sin hora estimada de regreso";const left=Math.max(0,Math.ceil((m.until*1000-Date.now())/60000));return"vuelve a las "+hhmm(m.until)+" · faltan "+left+" min"}
+function renderMaint(){
+ const m=maintLive(),dbg=!!(S&&S.me.debug);
+ const scr=$("#maintScreen"),bar=$("#maintBar");
+ if(m&&!dbg&&!(maintPass&&!S)||maintPrev){const mm=m||{msg:"estamos mejorando el hub",until:Date.now()/1000+1800};
+  $("#maintTxt").textContent=mm.msg;$("#maintEta").textContent=maintEtaText(mm);scr.hidden=false}else scr.hidden=true;
+ if(m&&dbg){const icon=h("span");icon.innerHTML=svg("warn");bar.hidden=false;
+  bar.replaceChildren(icon.firstChild,h("span",{class:"grow"},"mantenimiento activo · ",h("span",{class:"u"},maintEtaText(m))),h("button",{class:"tb",onclick:()=>send({type:"dbg_maint_end"})},"terminar ahora"))}else bar.hidden=true}
+$("#maintRetry").onclick=()=>{if(maintPrev){maintPrev=false;renderMaint();return}location.reload()};
+$("#maintDbg").onclick=()=>{if(maintPrev){maintPrev=false;renderMaint();return}if(S){logout()}maintPass=true;renderMaint()};
+setInterval(()=>{if(M)renderMaint();if(M&&!maintLive()){M=null;renderMaint()}},20000);
+let IMP=null,impClosed="",impPrev=false;
+function showImp(i){IMP=i||null;const s=$("#impScreen");if(!i||impClosed==i.id){s.hidden=true;return}impPrev=false;$("#impTxt").textContent=i.text;s.hidden=false}
+$("#impOk").onclick=()=>{if(IMP&&!impPrev)impClosed=IMP.id;impPrev=false;$("#impScreen").hidden=true};
+fetch("/api/notice").then(r=>r.json()).then(d=>{showImp(d.important);M=d.maintenance||null;renderMaint()}).catch(()=>{});
+function renderAnn(){
+ const a=S&&S.announce,b=$("#annBar");let closed="";try{closed=localStorage.getItem("ann_closed")||""}catch{}
+ if(!a||a.until*1000<Date.now()||closed==a.id){b.hidden=true;return}
+ const icon=h("span");icon.innerHTML=svg("warn");b.hidden=false;
+ b.replaceChildren(icon.firstChild,h("span",{class:"grow u"},a.text),h("button",{class:"ico",title:"cerrar","aria-label":"cerrar",onclick:()=>{try{localStorage.setItem("ann_closed",a.id)}catch{}b.hidden=true}},""));
+ b.lastChild.innerHTML=svg("close")}
+setInterval(()=>{if(S)renderAnn()},30000);
+const dbgGet=()=>{try{return localStorage.getItem("dbg_on")=="1"}catch{return false}};
+const dbgActive=()=>!!(S&&S.me.debug&&dbgGet());
+function dbgSet(on){try{on?localStorage.setItem("dbg_on","1"):localStorage.removeItem("dbg_on")}catch{}
+ if(!on){dbgVer=null;dbgEmpty=false}DBG.loaded=false;render();renderVersions()}
+function banModal(name){
+ const lines=["cierra todas sus sesiones y desconecta sus equipos","bloquea el inicio de sesión y el registro con ese nombre, y prohíbe sus ip y dispositivos (no se prohíben las ip locales ni las de depuradores)",
+  "conserva sus datos 30 días: puedes restaurarla desde aquí","«eliminar definitivamente» lo borra todo, sin vuelta atrás"];
+ modal("Banear «"+name+"»",h("div",{},h("p",{class:"hint"},"así lo verá la persona al abrir el portal o la app:"),
+  h("div",{class:"banmini"},h("b",{},"cuenta suspendida"),"esta cuenta se ha cerrado permanentemente y es inaccesible…"),
+  h("p",{class:"hint"},"se hará esto:"),h("ul",{class:"hint",style:"margin:0;padding-left:18px"},lines.map(l=>h("li",{},l)))),
+  h("span",{style:"display:contents"},h("button",{class:"btn danger",onclick:()=>{send({type:"dbg_ban",user:name});dlg.close()}},"Banear"),
+   h("button",{class:"btn danger",onclick:()=>deleteModal(name)},"Eliminar definitivamente")))}
+function deleteModal(name){
+ const i=h("input",{placeholder:name,autocomplete:"off",spellcheck:false,class:"u"});
+ modal("Eliminar «"+name+"» definitivamente",h("div",{},h("p",{class:"hint"},"se borran la cuenta y todos sus datos, sin vuelta atrás. sus ip y dispositivos siguen prohibidos. escribe el nombre exacto para confirmar."),i),
+  h("button",{class:"btn danger",onclick:()=>{send({type:"dbg_delete",user:name,confirm:i.value});dlg.close()}},"Eliminar"))}
+const fmtB=t=>String(t).split(/\*\*(.+?)\*\*/).map((x,i)=>i%2?h("b",{},x):x);
+async function changelogModal(edit){
+ const r=await ask("changelog_get",{});let list=[];try{list=JSON.parse(r.text||"[]")}catch{}
+ let sel=0;const lst=h("div",{class:"clist"}),txt=h("div",{class:"ctxt"});
+ const tag=x=>h("span",{class:"ctag "+(x.k=="grande"?"big":"small")},x.k=="grande"?"actualización grande":"parche");
+ const paint=()=>{
+  lst.replaceChildren(...list.map((x,i)=>h("button",{class:"cvb"+(i==sel?" on":""),onclick:()=>{sel=i;paint()}},h("span",{class:"cdot"+(x.k=="grande"?"":" s")}),h("span",{class:"u"},x.v||"?"),x.v==S.version?h("small",{},"actual"):null)),
+   ...(edit?[h("button",{class:"cvb add",onclick:()=>{list.unshift({v:"",k:"parche",p:[""]});sel=0;paint()}},"+ nueva versión")]:[]));
+  const x=list[sel];
+  if(!x){txt.replaceChildren(h("p",{class:"hint"},"aún no hay versiones."));return}
+  txt.classList.remove("pulse");void txt.offsetWidth;txt.classList.add("pulse");
+  if(!edit){txt.replaceChildren(h("div",{class:"cvh"},h("span",{class:"cvn u"},x.v),tag(x)),h("ul",{},...x.p.map(q=>h("li",{},h("span",{class:"u"},...fmtB(q))))));return}
+  const ver=h("input",{value:x.v,placeholder:"1.7",maxlength:12,class:"u",oninput:e=>{x.v=e.target.value.trim()}});
+  const kind=h("select",{onchange:e=>{x.k=e.target.value}},h("option",{value:"grande",selected:x.k=="grande"},"actualización grande"),h("option",{value:"parche",selected:x.k!="grande"},"parche"));
+  txt.replaceChildren(h("label",{style:"margin-top:0"},"Versión"),ver,h("label",{},"Tipo"),kind,h("label",{},"Puntos (usa **texto** para negrita)"),
+   ...x.p.map((q,i)=>h("div",{class:"cpt"},h("input",{value:q,maxlength:500,class:"u",oninput:e=>{x.p[i]=e.target.value}}),ico("trash","Quitar punto",()=>{x.p.splice(i,1);paint()},"red"))),
+   h("div",{class:"acts",style:"justify-content:flex-start"},h("button",{class:"btn tonal",onclick:()=>{x.p.push("");paint()}},"añadir punto"),
+    h("button",{class:"btn danger",onclick:()=>{if(confirm("¿eliminar esta versión del changelog?")){list.splice(sel,1);sel=Math.max(0,sel-1);paint()}}},"eliminar versión")))};
+ paint();
+ dlg.classList.add("wide");dlg.addEventListener("close",()=>dlg.classList.remove("wide"),{once:true});
+ modal(edit?"Editar changelog":"Novedades",h("div",{},h("p",{class:"hint",style:"margin:0 0 10px"},"tu sitio está en la v"+S.version),h("div",{class:"csplit"},lst,txt)),
+  edit?h("button",{class:"btn go",onclick:()=>{send({type:"dbg_changelog_set",list});dlg.close()}},"Guardar todo"):h("span"))}
+function renderDebug(){
+ const show=!!(S&&S.me.debug),on=dbgActive();
+ $("#dbgCard").hidden=!show;$("#dbgPanel").hidden=!on;$("#dbgBar").hidden=!on;
+ if(!on)return;
+ if(!DBG.loaded){DBG.loaded=true;send({type:"dbg_users"});send({type:"dbg_status"})}
+ const icon=h("span");icon.innerHTML=svg("warn");
+ $("#dbgBar").replaceChildren(icon.firstChild,h("span",{class:"grow"},"depuración activa · ",h("span",{class:"u"},S.me.user)),h("button",{class:"tb",onclick:()=>dbgSet(false)},"salir"));
+ const row=(...k)=>h("div",{class:"drow2"},...k),b=(t,fn,cls)=>h("button",{class:"btn "+(cls||"tonal"),onclick:fn},t),
+  sec=(t,...k)=>h("div",{class:"dsec"},h("h4",{},t),...k);
+ const mmsg=h("input",{value:"estamos mejorando el hub",maxlength:200,class:"u"}),
+  mmode=h("select",{},h("option",{value:"time"},"a una hora fija"),h("option",{value:"inf"},"sin hora (indefinido)")),mtime=h("input",{type:"time"});
+ mmode.onchange=()=>{mtime.hidden=mmode.value!="time"};
+ const text=h("input",{placeholder:"texto de la nota",maxlength:300,class:"u"}),imp=h("textarea",{rows:3,maxlength:600,placeholder:"texto del aviso importante",class:"u"}),mins=h("input",{type:"number",min:1,max:10080,value:60});
+ const st=DBG.status,fmtUp=t=>Math.floor(t/3600)+" h "+Math.floor(t%3600/60)+" min";
+ const users=DBG.users.map(u=>{
+  const me=u.name==S.me.user;
+  return h("div",{class:"duser"},h("div",{class:"nm"},h("span",{class:"u"},u.name),
+    u.debug&&h("span",{class:"chip ok",style:"margin-left:6px"},"depurador"),u.banned&&h("span",{class:"chip bad",style:"margin-left:6px"},"suspendida"),u.online&&h("span",{class:"chip",style:"margin-left:6px"},"en línea"),
+    h("small",{},u.devices+" equipos · "+u.vars+" variables"+(u.ip?" · ":""),u.ip&&h("span",{class:"u"},u.ip))),
+   !me&&!u.banned&&b("aviso",()=>{const t=prompt("mensaje para "+u.name);if(t)send({type:"dbg_notify",user:u.name,text:t})}),
+   !me&&b("cerrar sesión",()=>{if(confirm("¿cerrar todas las sesiones de "+u.name+"?"))send({type:"dbg_signout",user:u.name})}),
+   !u.banned&&b(u.debug?"quitar depuración":"dar depuración",()=>{if(confirm(u.debug?"¿quitar la depuración a "+u.name+"?":"¿dar depuración a "+u.name+"? podrá suspender y borrar cuentas."))send({type:"dbg_grant",user:u.name,on:!u.debug})}),
+   !me&&!u.debug&&!u.banned&&b("banear",()=>banModal(u.name),"danger"),
+   u.banned&&b("restaurar",()=>send({type:"dbg_unban",user:u.name})),
+   u.banned&&b("eliminar definitivamente",()=>deleteModal(u.name),"danger"))});
+ $("#dbgPanel").replaceChildren(h("h3",{},"depuración"),
+  sec("popups y avisos (solo para mí)",row(b("seguridad",()=>phAlert(true)),b("beta",()=>{betaClosed=false;$("#betaBar").hidden=false}),
+   b("cuenta bloqueada",unlockModal),b("suspensión",()=>showBanned(true)),
+   b("nota",()=>{S.announce={id:"preview",text:"esta es una nota de ejemplo",until:Date.now()/1000+60};renderAnn()}),
+   b("aviso importante",()=>{impPrev=true;$("#impTxt").textContent="este es un aviso importante de ejemplo. aparece al abrir el portal y no expira hasta que lo canceles.";$("#impScreen").hidden=false}))),
+  sec("simular versión del sitio",h("p",{class:"hint",style:"margin:0"},"muestra el aviso de «actualización grande» como si el sitio estuviera en otra versión. real: v"+S.version),
+   row(b("1.9",()=>{dbgVer="1.9";renderVersions()}),b("2.0",()=>{dbgVer="2.0";renderVersions()}),b("restablecer",()=>{dbgVer=null;renderVersions()}))),
+  sec("pestañas y estados",row(b(dbgEmpty?"mostrar mis datos":"simular cuenta vacía",()=>{dbgEmpty=!dbgEmpty;render()}))),
+  sec("nota (aparece arriba y se puede ignorar)",text,h("label",{},"caduca en (minutos)"),mins,
+   row(b("enviar nota",()=>send({type:"dbg_announce",text:text.value,minutes:+mins.value||60}),"go"),b("quitar nota actual",()=>send({type:"dbg_announce_clear"})))),
+  sec("aviso importante (al abrir el portal; no expira)",
+   S.important?h("div",{class:"dpre"},"vigente: "+S.important.text):h("p",{class:"hint",style:"margin:0"},"no hay ningún aviso importante."),imp,
+   row(b("publicar aviso importante",()=>{if(confirm("¿publicar este aviso? lo verá cualquiera que abra el portal hasta que lo canceles."))send({type:"dbg_important",text:imp.value})},"danger"),
+    b("cancelar aviso actual",()=>send({type:"dbg_important_clear"})))),
+  sec("mantenimiento",
+   maintLive()?h("div",{class:"dpre"},"activo · "+maintLive().msg+"\n"+maintEtaText(maintLive())):h("p",{class:"hint",style:"margin:0"},"no hay mantenimiento activo."),
+   h("label",{},"mensaje para los usuarios"),mmsg,h("label",{},"cuándo vuelve"),mmode,mtime,
+   h("p",{class:"hint"},"los depuradores siguen entrando. los demás ven la pantalla de mantenimiento; la api, los webhooks y las consultas de conexiones se pausan. no se borra nada."),
+   row(b("empezar mantenimiento",()=>{
+     let until=null;
+     if(mmode.value=="time"){if(!mtime.value)return toast("elige la hora de regreso");const[hh,mi]=mtime.value.split(":").map(Number),d=new Date();d.setHours(hh,mi,0,0);if(d.getTime()<Date.now()+60000)d.setDate(d.getDate()+1);until=d.getTime()/1000}
+     if(confirm("¿empezar el mantenimiento ahora? los usuarios normales no podrán usar el sitio"+(until?" hasta las "+hhmm(until):" hasta que lo termines")+"."))send({type:"dbg_maint_start",msg:mmsg.value,until})},"danger"),
+    ...(maintLive()?[b("terminar ahora",()=>send({type:"dbg_maint_end"}),"go")]:[]),
+    b("ver la pantalla",()=>{maintPrev=true;renderMaint()}))),
+  sec("páginas de error y respuesta (se abren en otra pestaña)",row(b("404",()=>open("/ruta/que/no/existe","_blank")),b("404 api",()=>open("/api/pushh","_blank")),
+   b("api (respuesta)",()=>open("/api/version","_blank")),b("405",()=>open("/api/push","_blank")))),
+  sec("changelog",row(b("editar",()=>changelogModal(true)))),
+  sec("estado del servidor",st?h("div",{class:"dpre"},"versión "+st.version+" · activo "+fmtUp(st.uptime)+"\ncuentas "+st.users+" ("+st.banned+" suspendidas) · conectados "+st.connected+" · equipos en línea "+st.devices_online+
+   "\nvariables "+st.variables+" · conexiones "+st.connections+" · automatizaciones "+st.automations+" · base de datos "+st.db_kb+" kb\n\nrecientes:\n"+(st.events.length?st.events.join("\n"):"ninguno")):h("p",{class:"hint"},"cargando…"),
+   row(b("actualizar",()=>send({type:"dbg_status"})))),
+  sec("cuentas",...users,row(b("actualizar lista",()=>send({type:"dbg_users"})))))}
+
+let phShown=false;
+const phIgnored=()=>{try{return localStorage.getItem("ph_ignored")=="1"}catch{return false}};
+function phSet(on){try{on?localStorage.setItem("ph_ignored","1"):localStorage.removeItem("ph_ignored")}catch{}}
+function phAlert(force){
+ if(!force&&phIgnored())return;
+ const icon=h("span");icon.innerHTML=svg("warn");
+ dlg.classList.add("warn");dlg.addEventListener("close",()=>dlg.classList.remove("warn"),{once:true});
+ dlg.replaceChildren(h("h3",{},icon.firstChild,"Aviso de seguridad"),
+  h("p",{},"Este programa no está enfocado en seguridad y está hecho con Claude como un side project. ",h("b",{},"No guardes información sensible en este sitio.")),
+  h("p",{},"Solo está hecho para poder compartir cosas con tus amigos y hacer multitarea fácil. Si quieres tener más privacidad, hostea tu propio servidor: ",
+   h("a",{href:"/project.zip",download:"hub-proyecto.zip"},"aquí"),h("span",{class:"hint"}," (descarga el proyecto completo para alojarlo en tu PC)"),"."),
+  h("div",{class:"acts"},
+   h("button",{class:"btn",onclick:()=>{phSet(true);syncSettings();dlg.close()}},"Ignorar este mensaje"),
+   h("button",{class:"btn danger",onclick:()=>dlg.close()},"Continuar")));
+ active=null;if(!dlg.open)dlg.showModal()}
+const betaIgnored=()=>{try{return localStorage.getItem("beta_ignored")=="1"}catch{return false}};
+let betaClosed=false;
+function betaSet(on){try{on?localStorage.setItem("beta_ignored","1"):localStorage.removeItem("beta_ignored")}catch{}}
+function betaShow(){$("#betaBar").hidden=betaClosed||betaIgnored()}
+function syncSettings(){const c=$("#phSw");if(c)c.checked=!phIgnored();const b=$("#betaSw");if(b)b.checked=!betaIgnored();betaShow()}
+function render(){
+ if(dbgEmpty&&S){const real=S;S={...S,variables:[],devices:[],widgets:[],automations:[],keys:[],connections:[]};try{render0()}finally{S=real}}else render0();
+ renderDebug();renderAnn()}
+function render0(){
+ if(!phShown){phShown=true;phAlert()}
+ renderSettings();renderLockBar();renderVersions();
+ const me=S.me;
+ $("#hello").replaceChildren(greeting()+",",h("br"),me.user);
+ $("#date").textContent=new Date().toLocaleDateString(HubI18n.locale(),{weekday:"long",day:"numeric",month:"long"});
+ const av=$("#avatar");av.style.backgroundImage=me.avatar?`url(${me.avatar})`:"";av.textContent=me.avatar?"":me.user[0];
+
+ const list=S.variables.filter(v=>filter=="all"||(filter=="mine"?v.mine:!v.mine));
+ $("#vars").replaceChildren(...(list.length?list.map((v,i)=>{
+  const c=h("div",{class:"vcard c"+i%3,style:"border-radius:"+SHAPES[i%4]+";--i:"+i},
+   h("div",{class:"vname"},v.name),
+   h("div",{class:"vval","data-vid":v.id},fmt(v)),
+   !v.mine&&h("div",{class:"vby"},"de "+v.owner),
+   h("div",{class:"vacts"},
+    v.mine&&v.kind=="manual"&&ico("pencil","Editar mensaje",()=>editVar(v)),
+    v.mine?ico("share","Compartir con otra cuenta"+(v.shared_with.length?` (${v.shared_with.length})`:""),()=>shareVar(v.id)):ico("person","Compartida por "+v.owner,()=>{}),
+    ico("trash",v.mine?"Eliminar":"Dejar de ver",()=>{if(confirm(v.mine?`¿eliminar «${v.name}»?`:"¿dejar de ver esta variable?"))send({type:"var_delete",id:v.id})},v.mine?"red":"")));
+  return c}):[h("div",{class:"empty",style:"grid-column:1/-1"},filter=="shared"?"nadie ha compartido variables contigo todavía.":"aún no tienes variables. crea una con «nueva variable».")]));
+
+ $("#devices").replaceChildren(...S.devices.map((d,i)=>{
+  const here=d.mine&&d.id==DEVICE_ID,mobile=/android/i.test(d.platform);
+  const av=h("div",{class:"dav a"+(!d.mine?3:mobile?1:i%2?2:0)});av.innerHTML=svg(mobile?"phone":"computer");
+  return h("div",{class:"drow",style:"--i:"+i},av,
+   h("div",{class:"dinfo"},h("div",{class:"dname"},d.name,here&&h("span",{class:"dsub"}," (este)")),
+    h("div",{class:"dsub"},(d.platform||"")+" · "+(d.mine?(d.online?T("en línea"):T("sin conexión")):T("de "+d.owner))+(d.mine&&d.kind=="agent"?" · "+(d.client_version?"v"+d.client_version:T("sin versión")):""))),
+   d.online&&h("span",{class:"chip ok"},"activo"),
+   d.mine?ico("pencil","Renombrar",()=>renameDevice(d)):ico("person","Dispositivo de "+d.owner,()=>{}),
+   !here&&ico("trash",d.mine?"Eliminar dispositivo":"Dejar de ver",()=>{
+    if(d.mine){if(confirm(`¿eliminar «${d.name}»? `+(d.online?"está conectado: se le cerrará la sesión de inmediato. ":"")+`también se borran sus variables automáticas.`))send({type:"dev_delete",device_id:d.id})}
+    else if(confirm(`¿dejar de ver las variables de ${d.owner}?`))S.variables.filter(v=>!v.mine&&v.owner==d.owner&&v.device_id==d.id).forEach(v=>send({type:"var_delete",id:v.id}))},d.mine?"red":""))}))
+ renderWidgets();renderKeys();renderAutos();renderConns();
+ for(const k of["vars","devices","wlist","keys","clist"])$("#"+k).classList.toggle("anim",anim);anim=false}
+
+/* ---------- widgets ---------- */
+let ticks=[];setInterval(()=>ticks.forEach(t=>{try{t.tick()}catch{}}),1000);
+function wctx(){
+ const c={usuario:S.me.user,pc:"este navegador"};
+ for(const v of S.variables)if(!v.mine){c[(v.name.trim()+"").toLowerCase()]??=fmt(v);c[(v.owner+"."+v.name).toLowerCase()]=fmt(v)}
+ for(const v of S.variables)if(v.mine)c[v.name.trim().toLowerCase()]=fmt(v);
+ return c}
+function renderWidgets(){
+ ticks=[];const fit=[];
+ const cards=S.widgets.map((w,i)=>{
+  const holder=h("div"),inner=h("div"),prev=h("div",{class:"wprev"},holder);holder.append(inner);
+  let r;try{r=HubWidget.render(inner,w.data,{mode:"edit",ctx:()=>wctx(),assetBase:""});ticks.push(r)}catch{}
+  fit.push([prev,holder,inner,w.data]);
+  const names=S.devices.filter(d=>d.mine&&w.devices.includes(d.id)).map(d=>d.name);
+  return h("div",{class:"wcard",style:"--i:"+i},prev,
+   h("div",{class:"wmeta"},h("div",{class:"wi"},h("div",{class:"wt"},w.name),h("div",{class:"wsub"},w.data.w+" × "+w.data.h+" · "+T(w.data.objects.length+" objeto"+(w.data.objects.length==1?"":"s")))),
+    h("a",{class:"btn tonal",href:"/editor?w="+w.id,style:"text-decoration:none"},"editar")),
+   h("div",{class:"chips"},names.length?names.map(n=>h("span",{},n)):[h("span",{style:"opacity:.7"},"sin pc asignado")]))});
+ $("#wlist").replaceChildren(...(cards.length?cards:[h("div",{class:"empty",style:"grid-column:1/-1"},"aún no tienes widgets. crea uno con «nuevo widget».")]));
+ for(const [prev,holder,inner,d] of fit){
+  const k=Math.min(1,(prev.clientWidth-24)/d.w,(prev.clientHeight-24)/d.h);
+  inner.style.transform="scale("+k+")";holder.style.cssText="width:"+d.w*k+"px;height:"+d.h*k+"px"}}
+
+/* ---------- api ---------- */
+function renderKeys(){
+ const when=t=>{if(!t)return"";const d=new Date(t<1e12?t*1000:t);return isNaN(d)?"":" · "+d.toLocaleDateString(HubI18n.locale(),{day:"numeric",month:"short",year:"numeric"})};
+ const rows=(S.keys||[]).map((k,i)=>{
+  const av=h("div",{class:"dav"});av.innerHTML=svg("key");
+  return h("div",{class:"krow",style:"--i:"+i},av,
+   h("div",{class:"dinfo"},h("div",{class:"dname"},k.label||"sin nombre"),h("div",{class:"dsub"},k.prefix+"…"+when(k.created))),
+   ico("trash","Revocar llave",()=>{if(confirm("¿revocar esta llave? lo que la use dejará de funcionar."))send({type:"key_delete",id:k.id})},"red"))});
+ $("#keys").replaceChildren(...(rows.length?rows:[h("div",{class:"empty"},"aún no tienes llaves. crea una con «nueva llave».")]));
+ $("#apiHelp").replaceChildren(h("p",{class:"hint sect",style:"margin-top:18px"},"ejemplo de uso:"),
+  h("code",{style:"max-width:720px"},`curl -X POST ${location.origin}/api/push -H "Authorization: Bearer hub_…" -H "Content-Type: application/json" -d '{"vars":{"pasos":"8421"}}'`),
+  h("p",{class:"hint sect"},"si la variable no existe, se crea como mensaje. máximo 120 peticiones por minuto."))}
+function newKey(){
+ const label=h("input",{placeholder:"nombre (ej. mi teléfono)",maxlength:40});
+ modal("Nueva llave",h("div",{},h("label",{style:"margin-top:0"},"Nombre"),label),
+  h("button",{class:"btn go",onclick:()=>{send({type:"key_create",label:label.value});dlg.close()}},"Crear llave"))}
+
+/* ---------- conexiones ---------- */
+const CONN_INFO={steam:"juego actual y horas jugadas",roblox:"amigos, seguidores y visitas a tus juegos"};
+function renderConns(){
+ const have=Object.fromEntries((S.connections||[]).map(c=>[c.service,c]));
+ const cards=["steam","roblox"].map((svc,i)=>{
+  const c=have[svc],bad=c&&/^error/.test(c.status||"");
+  return h("div",{class:"acard",style:"--i:"+i},
+   h("div",{class:"ahead"},h("div",{class:"at"},T(svc)),h("span",{class:"chip"+(c&&!bad?" ok":"")},c?(bad?"error":"conectado"):"sin conectar")),
+   h("div",{class:"asum"},c?h("b",{class:"u"},c.label):T(CONN_INFO[svc])),
+   c&&c.status&&h("div",{class:"ast"},T(c.status)),
+   c&&h("div",{class:"ast"},"ya puedes crear variables con estos datos en «nueva variable»."),
+   h("div",{class:"aacts"},
+    c?ico("bolt","Probar ahora",()=>send({type:"conn_test",service:svc})):null,
+    c?ico("pencil","Editar",()=>connModal(svc,c)):h("button",{class:"btn go",onclick:()=>connModal(svc,null)},"conectar"),
+    c?ico("trash","Desconectar",()=>{if(confirm(`¿desconectar «${T(svc)}»? también se borran las variables que usan esta conexión.`))send({type:"conn_delete",service:svc})},"red"):null))});
+ $("#clist").replaceChildren(...cards);$("#clist").classList.toggle("anim",anim)}
+function connModal(svc,c){
+ const err=h("p",{class:"hint",style:"color:var(--err);min-height:1.3em;margin:8px 4px 0"});
+ const inp=(ph,val,type)=>h("input",{type:type||"text",placeholder:ph,value:val||"",maxlength:80,autocomplete:"off",spellcheck:false});
+ let body,fields;
+ if(svc=="steam"){
+  const key=inp(c&&c.has_key?T("ya guardada: déjala vacía para conservarla"):"api key",""  ,"password"),id=inp("76561198…",c?c.label:"");
+  fields=()=>({key:key.value,id:id.value});
+  body=[h("p",{class:"hint"},"da el juego actual y las horas jugadas (totales y de las últimas 2 semanas). para ver las horas, pon «detalles del juego» en público en tu perfil de steam. solo datos públicos: nunca escribas tu contraseña de steam."),
+   h("label",{},"Api key (gratis en steamcommunity.com/dev/apikey)"),key,h("label",{},"Tu id numérica o nombre de perfil"),id,
+   h("p",{class:"hint"},"la api key se guarda en el servidor del hub, no se vuelve a mostrar y solo se usa para consultar tus datos públicos de steam.")]
+ }else{
+  const user=inp("",c?c.label:"");
+  fields=()=>({user:user.value});
+  body=[h("p",{class:"hint"},"solo datos públicos: amigos, seguidores y visitas a los juegos que creaste. nunca escribas tu contraseña de roblox."),
+   h("label",{},"Tu nombre de usuario"),user]}
+ modal((c?"Editar ":"Conectar ")+T(svc),h("div",{},...body,err),
+  h("button",{class:"btn go",onclick:()=>{err.textContent="";pend.conn=r=>{if(r.ok){dlg.close();toast(r.text)}else err.textContent=r.text};
+   send({type:"conn_save",service:svc,...fields()})}},"Guardar"))}
+
+/* ---------- ventanas ---------- */
+const dlg=$("#dlg");let active=null;
+$("#phSw").onchange=e=>{phSet(!e.target.checked)};
+$("#bPhoto").onclick=()=>$("#avatar").click();$("#bName").onclick=changeName;$("#bPw").onclick=changePw;$("#bPkAdd").onclick=passkeyModal;
+$("#dbgOn").onclick=()=>dbgSet(true);$("#dbgOff").onclick=()=>dbgSet(false);$("#bNews").onclick=$("#newsBtn").onclick=()=>changelogModal(false);
+$("#betaNow").onclick=()=>{$("#betaBar").hidden=false;toast("este es el aviso de beta")};
+if(pkSupport())$("#bKey").hidden=false;$("#bKey").onclick=passkeyLogin;
+for(const[id,k]of[["hideK","hk"],["hideW","hw"],["hideD","hd"],["hideA","ha"]]){$("#"+id).checked=!!hideGet()[k];$("#"+id).onchange=e=>hideSet(k,e.target.checked)}hideApply();
+$("#betaSw").onchange=e=>{betaSet(!e.target.checked);betaClosed=false;betaShow()};
+$("#betaX").onclick=()=>{betaClosed=true;betaShow()};$("#betaIgn").onclick=()=>{betaSet(true);syncSettings()};$("#phNow").onclick=()=>phAlert(true);syncSettings();
+function modal(title,body,acts,onState){
+ dlg.replaceChildren(h("h3",{},title),body,h("div",{class:"acts"},h("button",{class:"btn",onclick:()=>dlg.close()},"Cerrar"),acts));
+ active=onState||null;if(!dlg.open)dlg.showModal()}
+dlg.addEventListener("close",()=>active=null);
+
+function renameDevice(d){
+ const i=h("input",{value:d.name,maxlength:40});
+ const go=()=>{if(i.value.trim()){send({type:"dev_rename",device_id:d.id,name:i.value});dlg.close()}};
+ i.addEventListener("keydown",e=>e.key=="Enter"&&go());
+ modal("Renombrar dispositivo",i,h("button",{class:"btn go",onclick:go},"Guardar"));i.select()}
+
+function editVar(v){
+ const t=h("textarea",{rows:4,maxlength:2000},v.value||"");
+ modal(v.name,t,h("button",{class:"btn go",onclick:()=>{send({type:"var_set",id:v.id,value:t.value});dlg.close()}},"Guardar"))}
+
+function shareVar(id){
+ const list=h("div",{class:"chips"}),i=h("input",{placeholder:"nombre de usuario",maxlength:32});
+ const fill=()=>{const v=S.variables.find(x=>x.id==id);if(!v){dlg.close();return}
+  list.replaceChildren(...(v.shared_with.length?v.shared_with.map(u=>h("span",{},u,ico("trash","Quitar acceso",()=>send({type:"var_unshare",id,user:u})))):[h("span",{class:"hint",style:"background:none"},"Aún no la compartes con nadie.")]))};
+ const go=()=>{if(i.value.trim()){send({type:"var_share",id,user:i.value});i.value=""}};
+ i.addEventListener("keydown",e=>e.key=="Enter"&&go());
+ const v=S.variables.find(x=>x.id==id);
+ modal("Compartir «"+v.name+"»",h("div",{},h("p",{class:"hint"},"Quienes tengan acceso la ven en solo lectura."),list,h("label",{},"Añadir usuario"),i),
+  h("button",{class:"btn go",onclick:go},"Compartir"),fill);fill()}
+
+function newVar(){
+ const name=h("input",{placeholder:"nombre",maxlength:40}),val=h("textarea",{rows:3,placeholder:"mensaje inicial",maxlength:2000});
+ const srcs=[...S.devices.filter(d=>d.mine&&d.kind=="agent").map(d=>({id:d.id,name:d.name,phone:/android/i.test(d.platform)})),
+  ...(S.connections||[]).map(c=>({id:"@"+c.service,name:T(c.service)+" ("+T("cuenta")+")",conn:c.service}))];
+ const kind=h("select",{},h("option",{value:"manual"},"mensaje (lo escribes tú)"),h("option",{value:"auto"},"automática (mide un equipo o una conexión)"));
+ const dev=h("select",{},srcs.map(d=>h("option",{value:d.id},d.name)));
+ const met=h("select",{});
+ const warn=h("div",{class:"rootwarn",hidden:true},h("b",{},"variables root"),
+  h("p",{},"estas variables son más precisas pero requieren de magisk. esta función está en beta y, por tu seguridad, no se pueden cambiar cosas del root en sí, pero la app seguirá funcionando exactamente igual que en un teléfono normal."));
+ const param=h("input",{placeholder:"ej. roblox",maxlength:40}),paramBox=h("div",{hidden:true},h("label",{},"Nombre de la app"),param);
+ const sync=()=>{paramBox.hidden=met.value!="apptime";warn.hidden=!String(met.value).startsWith("root_")};
+ const opt=k=>h("option",{value:k},METRIC[k]);
+ const fillMet=()=>{const d=srcs.find(x=>x.id==dev.value);
+  met.replaceChildren(...(!d?[]:d.conn?Object.keys(METRIC).filter(k=>k.startsWith(d.conn+"_")).map(opt):
+   d.phone?[...PHONE_M.map(opt),h("optgroup",{label:T("root (beta)")},ROOT_M.map(opt))]:PC_M.map(opt)));sync()};
+ dev.onchange=fillMet;met.onchange=sync;fillMet();
+ const manual=h("div",{},h("label",{},"Mensaje"),val),
+  auto=h("div",{hidden:true},h("label",{},"Fuente"),dev,h("label",{},"Qué medir"),met,warn,paramBox,
+   h("p",{class:"hint"},"La app activa y el tiempo por app se activan en el icono de la bandeja del PC («Compartir actividad»). Steam y Roblox se conectan en la pestaña «conexiones»."));
+ kind.onchange=()=>{manual.hidden=kind.value!="manual";auto.hidden=kind.value!="auto"};
+ const hint=srcs.length?null:h("p",{class:"hint"},"Para variables automáticas necesitas un equipo con el agente (Windows, Linux o Mac), la app de Android o una cuenta conectada en «conexiones».");
+ modal("Nueva variable",h("div",{},h("label",{style:"margin-top:0"},"Nombre"),name,h("label",{},"Tipo"),kind,manual,auto,hint),
+  h("button",{class:"btn go",onclick:()=>{
+   if(kind.value=="auto"&&!dev.value)return toast("No tienes equipos ni conexiones para medir");
+   send({type:"var_create",name:name.value,kind:kind.value,value:val.value,device_id:dev.value,metric:met.value,param:param.value});dlg.close()}},"Crear"))}
+
+function apiModal(){
+ const label=h("input",{placeholder:"nombre (ej. mi teléfono)",maxlength:40}),list=h("div",{class:"chips"});
+ const fill=()=>list.replaceChildren(...((S.keys||[]).length?S.keys.map(k=>h("span",{},k.label+" ("+k.prefix+"…)",
+  ico("trash","Revocar llave",()=>{if(confirm("¿revocar esta llave? lo que la use dejará de funcionar."))send({type:"key_delete",id:k.id})}))):
+  [h("span",{class:"hint",style:"background:none"},"Aún no tienes llaves.")]));
+ modal("API para otras apps",h("div",{},h("p",{class:"hint"},"Con una llave, cualquier app o script puede crear y actualizar tus variables de tipo mensaje (por ejemplo, datos de salud mandados desde el teléfono)."),
+  list,h("label",{},"Nueva llave"),label),
+  h("button",{class:"btn go",onclick:()=>{send({type:"key_create",label:label.value});label.value=""}},"Crear llave"),fill);fill()}
+function showKey(m){
+ const cmd=`curl -X POST ${location.origin}/api/push -H "Authorization: Bearer ${m.key}" -H "Content-Type: application/json" -d '{"vars":{"pasos":"8421"}}'`;
+ modal("Tu llave de API",h("div",{},h("p",{},"Cópiala ahora: no se vuelve a mostrar."),h("code",{},m.key),
+  h("p",{},"Ejemplo de uso:"),h("code",{},cmd),
+  h("p",{class:"hint"},"Si la variable no existe, se crea como mensaje. Máximo 120 peticiones por minuto.")))}
+
+function addDevice(){
+ const body=h("div",{}),origin=location.origin;
+ const pick=()=>{body.replaceChildren(h("p",{},"¿Qué dispositivo quieres añadir?"),
+  h("div",{class:"choices"},["Windows","Linux","Mac","Android"].map((o,i)=>{
+   const b=h("button",{class:"tile t"+i,onclick:()=>steps(o)},o);b.insertAdjacentHTML("afterbegin",svg(o=="Android"?"phone":"computer"));return b})))};
+ const steps=o=>{
+  if(o=="Android")body.replaceChildren(h("p",{},"1. En el Android abre esta dirección y descarga la app:"),h("code",{},origin+"/hub.apk"),
+   h("a",{href:"/hub.apk",download:"hub.apk",class:"btn go",style:"display:inline-block;text-decoration:none;margin:6px 0"},"Descargar hub.apk"),
+   h("p",{},"2. Instálala (Android te pedirá permitir instalar apps de este origen) y ábrela."),
+   h("p",{},"3. Escribe la dirección del hub ("+origin+"), tu usuario y contraseña. El teléfono aparecerá aquí como un equipo y podrás crear variables automáticas con su batería y datos de Health Connect."),
+   h("button",{class:"btn tonal",onclick:pick},"← Volver"));
+  else if(o=="Windows")body.replaceChildren(h("p",{},"1. Descarga el instalador y ábrelo:"),
+   h("a",{href:"/instalar.exe",download:"HubSetup.exe",class:"btn go",style:"display:inline-block;text-decoration:none;margin:4px 0 8px"},"Descargar HubSetup.exe"),
+   h("p",{},"2. Pulsa «instalar» y espera unos minutos (descarga Python y las librerías, unos 300 MB). El agente se abre solo en la bandeja, junto al reloj, y arranca con Windows."),
+   h("p",{},"3. Inicia sesión en su ventana con tu cuenta. El equipo aparecerá aquí."),
+   h("p",{class:"hint"},"Windows puede mostrar «Windows protegió su PC» porque el programa no está firmado: pulsa «Más información» y luego «Ejecutar de todos modos»."),
+   h("button",{class:"btn tonal",onclick:pick},"← Volver"));
+  else{const win=o=="Windows",py=win?"python":"python3";
+   body.replaceChildren(h("p",{},"1. Instala Python 3 (python.org) y, en una terminal:"),
+    h("code",{},py+" -m pip install aiohttp psutil"+(win?" pystray pillow":"")),
+    h("p",{},"2. Descarga el agente: ",h("a",{href:"/agent.py",download:"agent.py"},"agent.py")),
+    h("p",{},win?"3. Ejecútalo en la carpeta donde lo guardaste. Aparece un icono en la barra de tareas y te pide la contraseña:":"3. Ejecútalo en la carpeta donde lo guardaste (te pedirá tu contraseña):"),
+    h("code",{},`${py} agent.py ${origin} ${S.me.user}${win?"":" --headless"}`),
+    win&&h("p",{class:"hint"},"En el icono puedes activar «Iniciar con Windows»."),
+    h("button",{class:"btn tonal",onclick:pick},"← Volver"))}};
+ pick();modal("Añadir dispositivo",body)}
+
+/* ---------- foto de perfil ---------- */
+function shrink(src){return new Promise(res=>{const im=new Image();im.onload=()=>{
+ const c=document.createElement("canvas");c.width=c.height=160;const s=Math.min(im.width,im.height);
+ c.getContext("2d").drawImage(im,(im.width-s)/2,(im.height-s)/2,s,s,0,0,160,160);res(c.toDataURL("image/jpeg",.85))};im.src=src})}
+$("#pick").onchange=e=>{const f=e.target.files[0];e.target.value="";if(!f)return;
+ const r=new FileReader();r.onload=()=>shrink(r.result).then(d=>send({type:"set_avatar",data:d}));r.readAsDataURL(f)};
+$("#avatar").onclick=()=>{
+ if(OS!="Windows")return $("#pick").click();
+ modal("Foto de perfil",h("p",{},"Estás en Windows. ¿Qué foto quieres usar?"),[
+  h("button",{class:"btn tonal",onclick:()=>{dlg.close();$("#pick").click()}},"Subir una"),
+  h("button",{class:"btn go",onclick:()=>{send({type:"request_win_avatar"});toast("Pidiendo la foto al agente de tu PC…");dlg.close()}},"La de mi cuenta de Windows")])};
+
+/* ---------- arranque ---------- */
+$("#bLogin").onclick=()=>auth("login");$("#bReg").onclick=()=>auth("register");
+$("#p").addEventListener("keydown",e=>e.key=="Enter"&&auth("login"));
+$("#logout").onclick=logout;if(window.HubApp){$("#phoneBtn").hidden=false;$("#phoneBtn").onclick=()=>HubApp.openSettings()}
+$("#addAuto").onclick=()=>S&&autoModal();$("#addW").onclick=()=>{location.href="/editor"};$("#addKey").onclick=()=>S&&newKey();$("#addDev").onclick=()=>S&&addDevice();$("#addVar").onclick=()=>S&&newVar();
+document.querySelectorAll(".nav[data-view]").forEach(n=>n.onclick=()=>setView(n.dataset.view));
+document.querySelectorAll("#filter button").forEach(b=>b.onclick=()=>{filter=b.dataset.f;anim=true;document.querySelectorAll("#filter button").forEach(x=>x.classList.toggle("on",x==b));if(S)render()});
+show(false);
+let saved=null;
+const fromTray=location.hash.match(/^#token=([\w-]+)$/);   // el boton «entra al portal» del agente
+if(fromTray){saved=fromTray[1];try{localStorage.setItem("token",saved)}catch{}history.replaceState(null,"",location.pathname)}
+else try{saved=localStorage.getItem("token")}catch{}
+if(saved)connect(saved);
+</script></body></html>
