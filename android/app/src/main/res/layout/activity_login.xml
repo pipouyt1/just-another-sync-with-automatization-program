@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="match_parent" android:fillViewport="true">
+    <LinearLayout android:id="@+id/col" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical" android:gravity="center_vertical" android:padding="28dp">
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="hub" android:textSize="48sp" android:textStyle="bold"
+            android:textColor="?attr/colorPrimary" />
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="inicia sesión para conectar este teléfono" android:textSize="16sp"
+            android:layout_marginBottom="24dp" />
+        <com.google.android.material.button.MaterialButtonToggleGroup
+            android:id="@+id/server" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginBottom="6dp" app:singleSelection="true" app:selectionRequired="true">
+            <Button android:id="@+id/btnCloud" style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
+                android:text="servicio en la nube" android:textAllCaps="false" />
+            <Button android:id="@+id/btnLocal" style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
+                android:text="servidor local" android:textAllCaps="false" />
+        </com.google.android.material.button.MaterialButtonToggleGroup>
+        <TextView android:id="@+id/serverHint" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp" android:textSize="13sp" />
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/urlBox"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:hint="dirección del hub" android:layout_marginBottom="8dp">
+            <com.google.android.material.textfield.TextInputEditText android:id="@+id/url"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:inputType="textUri" android:singleLine="true" />
+        </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:hint="usuario" android:layout_marginBottom="8dp">
+            <com.google.android.material.textfield.TextInputEditText android:id="@+id/user"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:inputType="textNoSuggestions" android:singleLine="true" />
+        </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:hint="contraseña" app:endIconMode="password_toggle">
+            <com.google.android.material.textfield.TextInputEditText android:id="@+id/pw"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:inputType="textPassword" android:singleLine="true" />
+        </com.google.android.material.textfield.TextInputLayout>
+        <TextView android:id="@+id/err" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:minHeight="28dp" android:layout_marginTop="8dp" android:textColor="#B3261E" />
+        <Button android:id="@+id/go" android:layout_width="match_parent" android:layout_height="56dp"
+            android:text="iniciar sesión" android:textAllCaps="false" android:textSize="16sp" />
+    </LinearLayout>
+</ScrollView>

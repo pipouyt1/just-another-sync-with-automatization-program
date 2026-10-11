@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/root" android:layout_width="match_parent" android:layout_height="match_parent">
+    <ImageView android:id="@+id/img" android:layout_width="match_parent" android:layout_height="match_parent"
+        android:scaleType="fitCenter" android:adjustViewBounds="false" />
+    <TextView android:id="@+id/msg" android:layout_width="match_parent" android:layout_height="match_parent"
+        android:gravity="center" android:padding="12dp" android:textSize="14sp"
+        android:textColor="#FFFFFF" android:background="#CC2B2930" android:visibility="gone" />
+</FrameLayout>
