@@ -10,4 +10,4 @@ go to the releases tab and click the pc installer or the android apk depending o
 ## security concerns
 this app is **ai-generated**, it has a database on its own that the ai doesn't have access to, but it can still have some privacy concerns to some of you, that's why i want to make this clear now
 
-(check out the pirate language that's in spanish if you're from north america, it's an easter egg in the language tab)
+(check out the pirate language that's in spanish if you're from south america, it's an easter egg in the language tab)
